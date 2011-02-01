@@ -4,7 +4,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.net.InetAddress;
 
 import network.NetworkConnection;
 import network.Paquet;
@@ -16,14 +15,12 @@ public class MirrorPong extends PongBase {
 	 */
 	private static final long serialVersionUID = 7224334478468671910L;
 
-	private InetAddress distant_player_host;
-	private int distant_player_port;
-	private static int port = 6000;
+	private static int server_port = 6000;
 	
 	/**
 	 * Nombre de points à atteindre pour remporter le match
 	 */
-	private int max_points = 2;
+	private int max_points = 0;
 
 
 	/**
@@ -36,7 +33,7 @@ public class MirrorPong extends PongBase {
 		
 		if(args.length == 1) {
 			try {
-				port = Integer.parseInt(args[0]);
+				server_port = Integer.parseInt(args[0]);
 			} catch(NumberFormatException e) {
 				System.err.println("Port incorrect : utilisation du port 6000");
 				// on ne modifie pas le port par défaut
@@ -56,7 +53,7 @@ public class MirrorPong extends PongBase {
 	public void start() {
 		// lancement du serveur
 		try {
-			sock = new NetworkConnection(port);
+			sock = new NetworkConnection(server_port);
 		} catch (IOException e) {
 			showAlert("Erreur au lancement du serveur : " + e);
 			System.exit(1);
@@ -81,9 +78,11 @@ public class MirrorPong extends PongBase {
 			
 			msg = p.getMessage();
 		}
+		
+		state = State.READY;
 
-		distant_player_host = p.getDatagram().getAddress();
-		distant_player_port = p.getDatagram().getPort();
+		setDistantHost(p.getDatagram().getAddress());
+		setDistantPort(p.getDatagram().getPort());
 		
 		super.start();
 	}
@@ -158,13 +157,14 @@ public class MirrorPong extends PongBase {
 	 */
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (state != State.WAITING)
+		if (state != State.READY)
 			return;
 		
 		ballSpeed.x = 4;
 		ballSpeed.y = 2;
 		
 		state = State.STARTED; // demarre le jeu
+		sendToDistantPlayer(MSG_GAME_STARTED);
 	}
 
 	/**
@@ -246,7 +246,7 @@ public class MirrorPong extends PongBase {
 		// ici, soit le jeu est terminé, soit on est en attente de la relance
 		state = (joueur1_score == max_points || joueur2_score == max_points)
 				? State.FINISHED
-				: State.WAITING;
+				: State.READY;
 
 		// envoi des scores
 		sendToDistantPlayer(MSG_SCORE + " P1 " + joueur1_score);
@@ -259,42 +259,10 @@ public class MirrorPong extends PongBase {
 
 		resetBall();
 	}
-
-	/**
-	 * Envoie un message au joueur distant
-	 * 
-	 * @param msg Le message à envoyer
-	 */
-	private void sendToDistantPlayer(String msg) {
-		if(distant_player_host == null)
-			return;
-		
-		try {
-			sock.send(distant_player_host, distant_player_port, msg);
-		} catch (IOException e) {
-			showAlert("Erreur à l'envoi de données vers le client : "+ e);
-		}
-	}
-
+	
 	@Override
 	protected void onGameOver(String winner) {
 		showAlert(winner.equals("P1")
 				  ? "Vous avez gagné \\o/" : "Vous avez perdu [-_-]\"");
-	}
-
-
-	@Override
-	protected void onGamePause() {
-		super.onGamePause();
-		
-		sendToDistantPlayer(String.format("%s on", MSG_PAUSE));
-	}
-
-
-	@Override
-	protected void onGameResume() {
-		super.onGameResume();
-		
-		sendToDistantPlayer(String.format("%s off", MSG_PAUSE));
 	}
 }

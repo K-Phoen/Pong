@@ -14,6 +14,8 @@ import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -25,7 +27,7 @@ import network.NetworkConnection;
 public abstract class PongBase extends JFrame implements KeyListener, Runnable, MouseListener, MouseMotionListener {
 	
 	protected enum State {
-		WAITING, STARTED, PAUSED, FINISHED
+		WAITING, READY, STARTED, PAUSED, FINISHED
 	}
 	
 	/**
@@ -42,6 +44,16 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 * Connexion au second joueur ou socket serveur
 	 */
 	protected NetworkConnection sock;
+	
+	/**
+	 * Adresse de l'hôte distant
+	 */
+	protected InetAddress distant_player_host;
+	
+	/**
+	 * Port de l'hôte distant
+	 */
+	protected int distant_player_port = 6000;
 	
 	/**
 	 * Etat actuel du jeu (lancé, en pause, etc.)
@@ -77,6 +89,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	protected static final String MSG_CONTACT		= "contact";
 	protected static final String MSG_WALL_TOUCHED 	= "wall";
 	protected static final String MSG_GAME_OVER 	= "game_over";
+	protected static final String MSG_GAME_STARTED 	= "game_started";
 	protected static final String MSG_PAUSE		 	= "set_pause";
 	
 	/**
@@ -142,6 +155,26 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		repaint();
 	}
 	
+	public void setDistantHost(String host) throws UnknownHostException {
+		distant_player_host = InetAddress.getByName(host);
+	}
+	
+	public void setDistantHost(InetAddress host) {
+		distant_player_host = host;
+	}
+	
+	public void setDistantPort(int port) {
+		distant_player_port = port;
+	}
+	
+	public InetAddress getDistantHost() {
+		return distant_player_host;
+	}
+	
+	public int getDistantPort() {
+		return distant_player_port;
+	}
+	
 	/**
 	 * Position la balle au centre du terrain, avec une vitesse nulle.
 	 */
@@ -171,6 +204,56 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	}
 	
 	/**
+	 * Envoie un message au joueur distant
+	 * 
+	 * @param msg Le message à envoyer
+	 */
+	protected void sendToDistantPlayer(String msg) {
+		if(distant_player_host == null)
+			return;
+		
+		try {
+			sock.send(distant_player_host, distant_player_port, msg);
+		} catch (IOException e) {
+			showAlert("Erreur à l'envoi de données vers le client : "+ e);
+		}
+	}
+
+	/**
+	 * Sera appelée lors de la sortie du mode pause
+	 * 
+	 * @param forward_info Doit-on envoyer l'info à l'hôte distant ?
+	 */
+	protected void onGamePause(boolean forward_info) {
+		if(state != State.STARTED)
+			return;
+		
+		state = State.PAUSED;
+		
+		if(forward_info)
+			sendToDistantPlayer(String.format("%s on", MSG_PAUSE));
+		
+		repaint();
+	}
+
+	/**
+	 * Sera appelée lors du début du mode pause
+	 * 
+	 * @param forward_info Doit-on envoyer l'info à l'hôte distant ?
+	 */
+	protected void onGameResume(boolean forward_info) {
+		if(state != State.PAUSED)
+			return;
+		
+		state = State.STARTED;
+		
+		if(forward_info)
+			sendToDistantPlayer(String.format("%s off", MSG_PAUSE));
+		
+		repaint();
+	}
+	
+	/**
 	 * Servira à mettre le jeu en pause
 	 */
 	@Override
@@ -179,9 +262,9 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		
 		if(c == 'p' || c == 'P') {
 			if(state == State.PAUSED)
-				onGameResume();
+				onGameResume(true);
 			else
-				onGamePause();
+				onGamePause(true);
 		}
 	}
 	
@@ -192,20 +275,6 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 * Sera appelée lors de la fin d'une partie
 	 */
 	protected abstract void onGameOver(String winner);
-	
-	/**
-	 * Sera appelée lors du début du mode pause
-	 */
-	protected void onGamePause() {
-		state = State.PAUSED;
-	}
-
-	/**
-	 * Sera appelée lors de la sortie du mode pause
-	 */
-	protected void onGameResume() {
-		state = State.STARTED;
-	}
 	
 	/**
 	 * Effectue un sleep
@@ -238,6 +307,9 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		} else if (args[0].equals(MSG_CONTACT)) {
 			playSound(SOUND_CONTACT);
 			return;
+		} else if (args[0].equals(MSG_GAME_STARTED)) {
+			state = State.STARTED;
+			return;
 		}
 		
 		
@@ -249,9 +321,9 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 				return;
 			} else if (args[0].equals(MSG_PAUSE)) {
 				if(args[1].equals("on"))
-					onGamePause();
+					onGamePause(false);
 				else
-					onGameResume();
+					onGameResume(false);
 				
 				return;
 			}
@@ -302,8 +374,6 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		
 		displayScores();
 		
-		drawGroundLines();
-		
 		if (plane != null) {
 			offscreeng.clipRect(plane.x, plane.y, plane.width - 28,
 								plane.height + 1);
@@ -313,14 +383,53 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 			offscreeng.drawImage(img_raquette2, joueur2.x, joueur2.y, null);
 			offscreeng.drawImage(img_raquette, joueur1.x,joueur1.y, null);
 			
-			// affichage de la balle
-			offscreeng.drawImage(img_ball, ballPoint.x - ball_width / 2,
-								 ballPoint.y - ball_height / 2, null);
+			// affichage d'un message si besoin
+			if(!drawStateMessage()) {
+				drawGroundLines();
+
+				// affichage de la balle
+				offscreeng.drawImage(img_ball, ballPoint.x - ball_width / 2,
+									 ballPoint.y - ball_height / 2, null);
+			}
 		}
 		
 		g.drawImage(offscreeni, 0, 10, this);
 	}
 	
+	/**
+	 * Affiche le message correspondant à l'état du jeu (s'il y en
+	 * a un).
+	 * 
+	 * @return true si un message a été affiché, false sinon
+	 */
+	private boolean drawStateMessage() {
+		switch (state) {
+			case WAITING:
+				offscreeng.setFont(new Font("Dialog", Font.BOLD, 40));
+				offscreeng.drawString("En attente ...",
+									  getWidth() / 2 - 90, getHeight() / 2);
+				break;
+			case READY:
+				offscreeng.setFont(new Font("Dialog", Font.BOLD, 40));
+				offscreeng.drawString("Prêt ?",
+									  getWidth() / 2 - 40, getHeight() / 2);
+				break;
+			case PAUSED:
+				offscreeng.setFont(new Font("Dialog", Font.BOLD, 40));
+				offscreeng.drawString("Pause", getWidth() / 2 - 50, getHeight() / 2 );
+				break;
+			case FINISHED:
+				offscreeng.setFont(new Font("Dialog", Font.BOLD, 40));
+				offscreeng.drawString("Game Over !", getWidth() / 2 - 110,
+									  getHeight() / 2);
+				break;
+			default:
+				return false;
+		}
+		
+		return true;
+	}
+
 	/**
 	 * Dessine les lignes du terrain
 	 */

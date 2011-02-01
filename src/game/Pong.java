@@ -2,7 +2,6 @@ package game;
 
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import network.NetworkConnection;
@@ -11,10 +10,6 @@ import network.Paquet;
 
 public class Pong extends PongBase {
 	private static final long serialVersionUID = 7657998555042629676L;
-	
-	private static String host = "localhost";
-	private InetAddress host_address = null;
-	private static int port = 6000;
 	
 	
 	/**
@@ -25,15 +20,24 @@ public class Pong extends PongBase {
 	public static void main(String[] args) {
 		Pong jp = new Pong();
 		
+		String host = "localhost";
+		
 		if(args.length == 2) {
+			host = args[0];
+			
 			try {
-				port = Integer.parseInt(args[0]);
+				jp.setDistantPort(Integer.parseInt(args[1]));
 			} catch(NumberFormatException e) {
 				System.err.println("Port incorrect : utilisation du port 6000");
 				// on ne modifie pas le port par défaut
 			}
-			
-			host = args[1];
+		}
+		
+		try {
+			jp.setDistantHost(host);
+		} catch (UnknownHostException e) {
+			System.err.println("Impossible de contacter le serveur : " + e);
+			System.exit(1);
 		}
 		
 		jp.start();
@@ -46,13 +50,6 @@ public class Pong extends PongBase {
 	 */
 	@Override
 	public void start() {
-		try {
-			host_address = InetAddress.getByName(host);
-		} catch (UnknownHostException e) {
-			showAlert("Impossible de contacter le serveur : " + e);
-			System.exit(1);
-		}
-		
 		// connexion au serveur
 		try{
 			sock = new NetworkConnection();
@@ -66,12 +63,14 @@ public class Pong extends PongBase {
 		// un espèce de handshake
 		while(true) {
 			try {
-				sock.sendAndWaitConfirm(host_address, port, "HELLO", 2000);
+				sock.sendAndWaitConfirm(getDistantHost(), getDistantPort(), "HELLO", 2000);
 				break;
 			} catch (IOException e) {
 				showAlert("Erreur à l'envoi de la demande de connexion au serveur : " + e.getMessage());
 			}
 		}
+		
+		state = State.READY;
 		
 		super.start();
 	}
@@ -115,16 +114,14 @@ public class Pong extends PongBase {
 	public void mouseMoved(MouseEvent e) {
 		joueur2.y = e.getY() - 25;
 		
-		try {
-			sock.send(host_address, port, MSG_MOVE + " P2 " + joueur2.y);
-		} catch (IOException ex) {
-			showAlert("Erreur à l'envoi des coordonnées du pavé vers le serveur : "+ ex);
-		}
+		sendToDistantPlayer(String.format("%s P2 %s", MSG_MOVE, joueur2.y));
 	}
 	
 	@Override
 	protected void onGameOver(String winner) {
 		state = State.FINISHED;
+		
+		repaint();
 		
 		showAlert(winner.equals("P2")
 				  ? "Vous avez gagné \\o/" : "Vous avez perdu [-_-]\"");
