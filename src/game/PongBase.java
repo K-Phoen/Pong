@@ -30,10 +30,13 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	protected Graphics offscreeng;
 	protected Rectangle plane;
 	protected Point ballPoint, joueur1, joueur2, ballSpeed;
-	final int racket_width = 6, racket_height = 50;
 	
 	BufferedImage img_ball;
 	final int ball_width = 32, ball_height = 32;
+	
+	BufferedImage img_raquette;
+	BufferedImage img_raquette2;
+	final int racket_width = 13, racket_height = 75;
 	
 	/**
 	 * Indique si le jeu est démarré
@@ -98,11 +101,13 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 		joueur1 = new Point(35, ((getHeight() / 2) - 25));
 		
 		
-		// chargement de l'image de la balle
+		// chargement de l'image de la balle et des raquettes
 		try {
 			img_ball = ImageIO.read(new File("./data/ball.png"));
+			img_raquette = ImageIO.read(new File("./data/raquette.png"));
+			img_raquette2 = ImageIO.read(new File("./data/raquette2.png"));
 		} catch (IOException e) {
-			System.err.println("Impossible de charger l'image de la balle : "+e.getMessage());
+			System.err.println("Impossible de charger l'image : "+e.getMessage());
 			System.exit(1);
 		}
 		
@@ -215,8 +220,11 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 								plane.height + 1);
 			offscreeng.drawRect(plane.x, plane.y, plane.width - 30, plane.height);
 			
-			offscreeng.fillRect(joueur1.x, joueur1.y, racket_width, racket_height);
-			offscreeng.fillRect(joueur2.x, joueur2.y, racket_width, racket_height);
+//			offscreeng.fillRect(joueur1.x, joueur1.y, racket_width, racket_height);
+//			offscreeng.fillRect(joueur2.x, joueur2.y, racket_width, racket_height);
+			
+			offscreeng.drawImage(img_raquette2, joueur2.x, joueur2.y, null);
+			offscreeng.drawImage(img_raquette, joueur1.x,joueur1.y, null);
 			
 			offscreeng.drawImage(img_ball, ballPoint.x - ball_width / 2,
 								 ballPoint.y - ball_height / 2, null);
