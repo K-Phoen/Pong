@@ -122,7 +122,7 @@ public class NetworkConnection {
 				continue;
 			}
 			
-			if(reply.getMessage().equals(String.format("%d OK", to_confirm)))
+			if(reply != null && reply.getMessage().equals(String.format("%d OK", to_confirm)))
 				return;
 		}
 		

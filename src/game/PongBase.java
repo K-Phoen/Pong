@@ -263,7 +263,7 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	 *          circle.
 	 * @param r The radius of the circle.
 	 */
-	public static void drawCircle(Graphics g, int x, int y, int r) {
+	private static void drawCircle(Graphics g, int x, int y, int r) {
 		g.drawOval(x-r, y-r, 2*r, 2*r);
 	}
 
@@ -283,7 +283,7 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	 * @param r The radius of the circle.
 	 * @param thickness Pen thickness of circle drawn.
 	 */
-	public static void drawCircle(Graphics g, int x, int y, int r, int thickness) {
+	private static void drawCircle(Graphics g, int x, int y, int r, int thickness) {
 		// correction du rayon pour prendre en compte l'épaisseur du trait
 		r += thickness / 2;  
 		

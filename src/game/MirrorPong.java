@@ -19,6 +19,7 @@ public class MirrorPong extends PongBase {
 	private NetworkConnection sock;
 	private InetAddress distant_player_host;
 	private int distant_player_port;
+	private static int port = 6000;
 
 
 	/**
@@ -26,8 +27,18 @@ public class MirrorPong extends PongBase {
 	 * 
 	 * @param arg
 	 */
-	public static void main(String[] arg) {
+	public static void main(String[] args) {
 		MirrorPong jp = new MirrorPong();
+		
+		if(args.length == 1) {
+			try {
+				port = Integer.parseInt(args[0]);
+			} catch(NumberFormatException e) {
+				System.err.println("Port incorrect : utilisation du port 6000");
+				// on ne modifie pas le port par défaut
+			}
+		}
+		
 		jp.start();
 	}
 
@@ -41,7 +52,7 @@ public class MirrorPong extends PongBase {
 	public void start() {
 		// lancement du serveur
 		try {
-			sock = new NetworkConnection(6000);
+			sock = new NetworkConnection(port);
 		} catch (IOException e) {
 			System.err.println("Erreur au lancement du serveur : " + e);
 			System.exit(1);
@@ -85,7 +96,7 @@ public class MirrorPong extends PongBase {
 		Paquet p;
 		while (true) { // en attendant d'avoir mieux
 			try {
-				p = sock.tryReceive(10);
+				p = sock.tryReceive(5);
 			} catch (IOException e) {
 				p = null;
 			}
@@ -122,8 +133,6 @@ public class MirrorPong extends PongBase {
 	@Override
 	public void mouseMoved(MouseEvent e) {
 		joueur1.y = e.getY() - 25;
-
-		repaint();
 	}
 	
 	/**
