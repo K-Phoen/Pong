@@ -17,6 +17,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
+import network.NetworkConnection;
+
 
 public abstract class PongBase extends JFrame implements KeyListener, Runnable, MouseListener, MouseMotionListener {
 	/**
@@ -27,6 +29,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	protected static final String SOUND_CONTACT = "./data/pong.wav";
 	
 	protected Thread runner;
+	protected NetworkConnection sock;
 	
 	protected Image offscreeni;
 	protected Graphics offscreeng;
@@ -160,8 +163,6 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	public void mouseClicked(MouseEvent e) { }
 	
 	protected abstract void onGameOver(String winner);
-	protected abstract void onGamePause();
-	protected abstract void onGameResume();
 	
 	/**
 	 * Analyse un message transmis par le réseau pour
@@ -428,6 +429,14 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	public void keyTyped(KeyEvent e) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	protected void onGamePause() {
+		is_paused = true;
+	}
+
+	protected void onGameResume() {
+		is_paused = false;
 	}
 	
 	protected void wait(int delay) {

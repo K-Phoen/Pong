@@ -16,7 +16,6 @@ public class MirrorPong extends PongBase {
 	 */
 	private static final long serialVersionUID = 7224334478468671910L;
 
-	private NetworkConnection sock;
 	private InetAddress distant_player_host;
 	private int distant_player_port;
 	private static int port = 6000;
@@ -100,10 +99,10 @@ public class MirrorPong extends PongBase {
 
 		Paquet p;
 		while (true) { // en attendant d'avoir mieux
-			if(is_paused) {
-				wait(10);
+			wait(10);
+			
+			if(is_paused)
 				continue;
-			}
 			
 			try {
 				p = sock.tryReceive(5);
@@ -127,8 +126,6 @@ public class MirrorPong extends PongBase {
 			
 			if(joueur1_score == max_points || joueur2_score == max_points)
 				break;
-
-			wait(10);
 		}
 		
 		String winner = (joueur1_score == max_points) ? "P1" : "P2";
@@ -286,7 +283,7 @@ public class MirrorPong extends PongBase {
 
 	@Override
 	protected void onGamePause() {
-		is_paused = true;
+		super.onGamePause();
 		
 		sendToDistantPlayer(String.format("%s on", MSG_PAUSE));
 	}
@@ -294,7 +291,7 @@ public class MirrorPong extends PongBase {
 
 	@Override
 	protected void onGameResume() {
-		is_paused = false;
+		super.onGameResume();
 		
 		sendToDistantPlayer(String.format("%s off", MSG_PAUSE));
 	}

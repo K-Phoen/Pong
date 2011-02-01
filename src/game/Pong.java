@@ -12,7 +12,6 @@ import network.Paquet;
 public class Pong extends PongBase {
 	private static final long serialVersionUID = 7657998555042629676L;
 	
-	private NetworkConnection sock;
 	private static String host = "localhost";
 	private InetAddress host_address = null;
 	private static int port = 6000;
@@ -87,6 +86,8 @@ public class Pong extends PongBase {
 		
 		Paquet p;
 		while (true) {
+			wait(5);
+			
 			try {
 				p = sock.tryReceive(5);
 			} catch (IOException e) {
@@ -96,14 +97,10 @@ public class Pong extends PongBase {
 			if(p != null && p.getMessage() != null)
 				executeCmd(p.getMessage());
 			
-			if(is_paused) {
-				wait(5);
+			if(is_paused) 
 				continue;
-			}
 
 			repaint();
-
-			wait(5);
 		}
 	}
 	
@@ -132,17 +129,5 @@ public class Pong extends PongBase {
 			System.out.println("J'ai gagné \\o/");
 		else
 			System.out.println("J'ai perdu [-_-]\"");
-	}
-
-
-	@Override
-	protected void onGamePause() {
-		is_paused = true;
-	}
-
-
-	@Override
-	protected void onGameResume() {
-		is_paused = false;
 	}
 }
