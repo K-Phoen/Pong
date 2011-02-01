@@ -18,7 +18,7 @@ import javax.swing.JFrame;
 
 public abstract class PongBase extends JFrame implements Runnable, MouseListener, MouseMotionListener {
 	/**
-	 * ID de sï¿½rialisation 
+	 * ID de sérialisation 
 	 */
 	private static final long serialVersionUID = -8330079307530116835L;
 	
@@ -36,12 +36,12 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	final int ball_width = 32, ball_height = 32;
 	
 	/**
-	 * Indique si le jeu est dï¿½marrï¿½
+	 * Indique si le jeu est démarré
 	 */
 	protected boolean is_game_started = false;
 	
 	/**
-	 * Utilisï¿½e pour faire clignoter le jeu
+	 * Utilisée pour faire clignoter le jeu
 	 */
 	protected boolean death_mode = false;
 	
@@ -51,7 +51,7 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	protected int joueur1_score = 0;
 	
 	/**
-	 * Score du joueur 1
+	 * Score du joueur 2
 	 */
 	protected int joueur2_score = 0;
 	
@@ -76,7 +76,7 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	 * Initialise la partie graphique.
 	 */
 	protected void initGUI(String window_title) {
-		// caractï¿½ristiques de la fenêtre
+		// caractéristiques de la fenêtre
 		setTitle(window_title);
 		setVisible(true);
 		setBounds(100, 100, 640, 480);
@@ -87,7 +87,7 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 		addMouseListener(this);
 		addMouseMotionListener(this);
 
-		// crï¿½ation du plateau de jeu
+		// création du plateau de jeu
 		offscreeni = createImage(getWidth(), getHeight());
 
 		offscreeng = offscreeni.getGraphics();
@@ -125,9 +125,9 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	}
 	
 	/**
-	 * Crï¿½e un thread avec la classe courante.
-	 * Ce thread sera chargï¿½ de mettre ï¿½ jour l'affichage en fonction
-	 * des ï¿½changes entre le client et le serveur.
+	 * Crée un thread avec la classe courante.
+	 * Ce thread sera chargé de mettre à jour l'affichage en fonction
+	 * des échanges entre le client et le serveur.
 	 */
 	protected void startGame() {
 		if (runner != null)
@@ -148,10 +148,10 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	public void mouseClicked(MouseEvent e) { }
 	
 	/**
-	 * Analyse un message transmis par le rï¿½seau pour
-	 * exï¿½cuter la mï¿½thode qui va bien.
+	 * Analyse un message transmis par le réseau pour
+	 * exécuter la méthode qui va bien.
 	 * 
-	 * @param cmd Message ï¿½ analyser
+	 * @param cmd Message à analyser
 	 */
 	protected void executeCmd(String cmd)
 	{
@@ -178,7 +178,7 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 			ballPoint.x = Integer.parseInt(args[1]);
 			ballPoint.y = Integer.parseInt(args[2]);
 		}
-		else if(args[0].equals(MSG_SCORE)) { // mise ï¿½ jour des scores
+		else if(args[0].equals(MSG_SCORE)) { // mise à jour des scores
 			if(args[1].equals("P1"))
 				joueur1_score = Integer.parseInt(args[2]);
 			else
@@ -243,7 +243,8 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 		offscreeng.drawLine(getWidth()/2-1,getHeight(),getWidth()/2-1, -getHeight());
 	}
 
-	/** Calls the drawOval method of java.awt.Graphics
+	/** 
+	 * 	Calls the drawOval method of java.awt.Graphics
 	 *  with a square bounding box centered at specified
 	 *  location with width/height of 2r.
 	 *
@@ -254,12 +255,12 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	 *          circle.
 	 * @param r The radius of the circle.
 	 */
-	public static void drawCircle(Graphics g,
-			int x, int y, int r) {
+	public static void drawCircle(Graphics g, int x, int y, int r) {
 		g.drawOval(x-r, y-r, 2*r, 2*r);
 	}
 
-	/** Draws a circle of radius r at location (x,y) with
+	/**
+	 * 	Draws a circle of radius r at location (x,y) with
 	 *  the specified line width. Note that the radius r
 	 *  is to the <B>center</B> of the doughnut drawn.
 	 *  The outside radius will be r+lineWidth/2 (rounded
@@ -272,20 +273,22 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	 * @param y The y-coordinate of the center of the
 	 *          circle.
 	 * @param r The radius of the circle.
-	 * @param lineWidth Pen thickness of circle drawn.
+	 * @param thickness Pen thickness of circle drawn.
 	 */
-	public static void drawCircle(Graphics g,
-			int x, int y, int r,
-			int lineWidth) {
-		r = r+lineWidth/2;  
-		for(int i=0; i<lineWidth; i++) {
+	public static void drawCircle(Graphics g, int x, int y, int r, int thickness) {
+		// correction du rayon pour prendre en compte l'épaisseur du trait
+		r += thickness / 2;  
+		
+		for(int i=0; i < thickness; i++) {
 			drawCircle(g, x, y, r);
-			if ((i+1)<lineWidth) {
+			
+			if (i+1 < thickness) {
 				drawCircle(g, x+1, y, r-1);
 				drawCircle(g, x-1, y, r-1);
 				drawCircle(g, x, y+1, r-1);
 				drawCircle(g, x, y-1, r-1);
-				r = r-1;
+				
+				r--;
 			}
 		}
 	}
