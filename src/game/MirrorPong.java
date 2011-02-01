@@ -110,7 +110,8 @@ public class MirrorPong extends PongBase {
 
 			moveBall();
 
-			sendPositions();
+			// envoi de la position de la balle
+			sendToDistantPlayer(String.format("%s %d %d", MSG_BALL, ballPoint.x, ballPoint.y));
 
 			repaint();
 
@@ -133,6 +134,9 @@ public class MirrorPong extends PongBase {
 	@Override
 	public void mouseMoved(MouseEvent e) {
 		joueur1.y = e.getY() - 25;
+		
+		// envoi de la position du joueur 1
+		sendToDistantPlayer(String.format("%s P1 %d", MSG_MOVE, joueur1.y));
 	}
 	
 	/**
@@ -156,8 +160,8 @@ public class MirrorPong extends PongBase {
 	 * Déplace la balle selon sa vitesse actuelle.
 	 */
 	protected void moveBall() {
-		ballPoint.x = ballPoint.x + ballSpeed.x;
-		ballPoint.y = ballPoint.y + ballSpeed.y;
+		ballPoint.x += ballSpeed.x;
+		ballPoint.y += ballSpeed.y;
 	}
 
 	/**
@@ -238,11 +242,6 @@ public class MirrorPong extends PongBase {
 		resetBall();
 
 		is_game_started = false;
-	}
-	
-	private void sendPositions() {
-		sendToDistantPlayer(String.format("%s %d %d", MSG_BALL, ballPoint.x, ballPoint.y));
-		sendToDistantPlayer(String.format("%s P1 %d", MSG_MOVE, joueur1.y));
 	}
 
 	/**
