@@ -20,6 +20,11 @@ public class MirrorPong extends PongBase {
 	private InetAddress distant_player_host;
 	private int distant_player_port;
 	private static int port = 6000;
+	
+	/**
+	 * Nombre de points à atteindre pour remporter le match
+	 */
+	private int max_points = 2;
 
 
 	/**
@@ -95,6 +100,11 @@ public class MirrorPong extends PongBase {
 
 		Paquet p;
 		while (true) { // en attendant d'avoir mieux
+			if(is_paused) {
+				wait(10);
+				continue;
+			}
+			
 			try {
 				p = sock.tryReceive(5);
 			} catch (IOException e) {
@@ -114,13 +124,17 @@ public class MirrorPong extends PongBase {
 			sendToDistantPlayer(String.format("%s %d %d", MSG_BALL, ballPoint.x, ballPoint.y));
 
 			repaint();
+			
+			if(joueur1_score == max_points || joueur2_score == max_points)
+				break;
 
-			try {
-				Thread.sleep(10); 
-			} catch (InterruptedException e) {
-				// rien
-			}
+			wait(10);
 		}
+		
+		String winner = (joueur1_score == max_points) ? "P1" : "P2";
+		
+		sendToDistantPlayer(String.format("%s %s", MSG_GAME_OVER, winner));
+		onGameOver(winner);
 	}
 
 	/**
@@ -259,5 +273,29 @@ public class MirrorPong extends PongBase {
 			System.err.println("Erreur à l'envoi de données vers le client : "+ e);
 			System.err.println("Message à envoyer : "+ msg);
 		}
+	}
+
+	@Override
+	protected void onGameOver(String winner) {
+		if(winner.equals("P1"))
+			System.out.println("J'ai gagné \\o/");
+		else
+			System.out.println("J'ai perdu [-_-]\"");
+	}
+
+
+	@Override
+	protected void onGamePause() {
+		is_paused = true;
+		
+		sendToDistantPlayer(String.format("%s on", MSG_PAUSE));
+	}
+
+
+	@Override
+	protected void onGameResume() {
+		is_paused = false;
+		
+		sendToDistantPlayer(String.format("%s off", MSG_PAUSE));
 	}
 }

@@ -95,14 +95,15 @@ public class Pong extends PongBase {
 			
 			if(p != null && p.getMessage() != null)
 				executeCmd(p.getMessage());
+			
+			if(is_paused) {
+				wait(5);
+				continue;
+			}
 
 			repaint();
 
-			try {
-				Thread.sleep(5); //pause pour ralentir le jeu
-			} catch (InterruptedException e) {
-				// rien
-			}
+			wait(5);
 		}
 	}
 	
@@ -123,5 +124,25 @@ public class Pong extends PongBase {
 		} catch (IOException ex) {
 			System.err.println("Erreur à l'envoi des coordonnées du pavé vers le serveur : "+ ex);
 		}
+	}
+	
+	@Override
+	protected void onGameOver(String winner) {
+		if(winner.equals("P2"))
+			System.out.println("J'ai gagné \\o/");
+		else
+			System.out.println("J'ai perdu [-_-]\"");
+	}
+
+
+	@Override
+	protected void onGamePause() {
+		is_paused = true;
+	}
+
+
+	@Override
+	protected void onGameResume() {
+		is_paused = false;
 	}
 }

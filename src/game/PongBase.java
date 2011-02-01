@@ -5,6 +5,8 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -16,7 +18,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 
-public abstract class PongBase extends JFrame implements Runnable, MouseListener, MouseMotionListener {
+public abstract class PongBase extends JFrame implements KeyListener, Runnable, MouseListener, MouseMotionListener {
 	/**
 	 * ID de sérialisation 
 	 */
@@ -37,6 +39,8 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	BufferedImage img_raquette;
 	BufferedImage img_raquette2;
 	final int racket_width = 13, racket_height = 75;
+	
+	protected boolean is_paused = false;
 	
 	/**
 	 * Indique si le jeu est démarré
@@ -65,6 +69,8 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	protected static final String MSG_SCORE 		= "score";
 	protected static final String MSG_CONTACT		= "contact";
 	protected static final String MSG_WALL_TOUCHED 	= "wall";
+	protected static final String MSG_GAME_OVER 	= "game_over";
+	protected static final String MSG_PAUSE		 	= "set_pause";
 	
 	
 	/**
@@ -89,6 +95,7 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 		// ajout des listener
 		addMouseListener(this);
 		addMouseMotionListener(this);
+		addKeyListener(this);
 
 		// création du plateau de jeu
 		offscreeni = createImage(getWidth(), getHeight());
@@ -144,13 +151,17 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 		try {
 			runner.start();
 		} catch (IllegalStateException e) {
-			System.err.println("Impossible de crï¿½er le thread du jeu : "+e.getMessage());
+			System.err.println("Impossible de créer le thread du jeu : "+e.getMessage());
 			System.exit(1);
 		}
 	}
 	
 	@Override
 	public void mouseClicked(MouseEvent e) { }
+	
+	protected abstract void onGameOver(String winner);
+	protected abstract void onGamePause();
+	protected abstract void onGameResume();
 	
 	/**
 	 * Analyse un message transmis par le réseau pour
@@ -162,6 +173,8 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	{
 		String[] args = cmd.split(" ");
 		
+		/* commandes à un seul argument */
+		
 		if(args[0].equals(MSG_WALL_TOUCHED)) {
 			onWallTouched();
 			return;
@@ -169,9 +182,28 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 			playSound(SOUND_CONTACT);
 			return;
 		}
+		
+		
+		/* commandes à deux arguments */
+		
+		if(args.length == 2) {
+			if (args[0].equals(MSG_GAME_OVER)) {
+				onGameOver(args[1]);
+				return;
+			} else if (args[0].equals(MSG_PAUSE)) {
+				if(args[1].equals("on"))
+					onGamePause();
+				else
+					onGameResume();
+				
+				return;
+			}
+		}
 			
 		if(args.length != 3)
 			return;
+		
+		/* commandes à trois arguments */
 		
 		if(args[0].equals(MSG_MOVE)) { // changement de la position des joueurs
 			if(args[1].equals("P1"))
@@ -371,4 +403,38 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 
 	@Override
 	public void mouseDragged(MouseEvent e) { }
+	
+	@Override
+	public void keyPressed(KeyEvent e) {
+		char c =e.getKeyChar();
+		
+		if(c == 'p' | c == 'P') {
+			if(is_paused)
+				onGameResume();
+			else
+				onGamePause();
+		}
+	}
+
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	protected void wait(int delay) {
+		try {
+			Thread.sleep(delay); 
+		} catch (InterruptedException e) {
+			// rien
+		}
+	}
 }
