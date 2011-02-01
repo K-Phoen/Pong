@@ -202,11 +202,13 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 		if (offscreeng == null)
 			return;
 		
-		offscreeng.setColor(Color.black);
+		offscreeng.setColor(new Color(244, 122, 0)); // orange foncé
 		offscreeng.fillRect(0, 0, getWidth(), getHeight());
 		offscreeng.setColor(!death_mode ? Color.white : Color.red);
 		
 		displayScores();
+		
+		drawGroundLines();
 		
 		if (plane != null) {
 			offscreeng.clipRect(plane.x, plane.y, plane.width - 28,
@@ -224,15 +226,80 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	}
 	
 	/**
+	 * Dessine les lignes du terrain
+	 */
+	private void drawGroundLines() {
+		int circle_radius = 75;
+		int circle_origin_y = getHeight() / 2;
+		int circle_origin_x = getWidth() / 2;
+		int thickness = 4;
+		
+		drawCircle(offscreeng, circle_origin_x, circle_origin_y, circle_radius, thickness);
+				
+		//creation de la ligne de fond verticale ( drawLine(x1,y1,x2,y2) ) du point (x1,y1) au point (x2,y2)
+		// on en fait plusieurs pour gérer l'épaisseur du trait 
+		offscreeng.drawLine(getWidth()/2,getHeight(),getWidth()/2, -getHeight());	
+		offscreeng.drawLine(getWidth()/2+1,getHeight(),getWidth()/2+1, -getHeight());
+		offscreeng.drawLine(getWidth()/2-1,getHeight(),getWidth()/2-1, -getHeight());
+	}
+
+	/** Calls the drawOval method of java.awt.Graphics
+	 *  with a square bounding box centered at specified
+	 *  location with width/height of 2r.
+	 *
+	 * @param g The Graphics object.
+	 * @param x The x-coordinate of the center of the
+	 *          circle.
+	 * @param y The y-coordinate of the center of the
+	 *          circle.
+	 * @param r The radius of the circle.
+	 */
+	public static void drawCircle(Graphics g,
+			int x, int y, int r) {
+		g.drawOval(x-r, y-r, 2*r, 2*r);
+	}
+
+	/** Draws a circle of radius r at location (x,y) with
+	 *  the specified line width. Note that the radius r
+	 *  is to the <B>center</B> of the doughnut drawn.
+	 *  The outside radius will be r+lineWidth/2 (rounded
+	 *  down). Inside radius will be r-lineWidth/2
+	 *  (rounded down).
+	 *
+	 * @param g The Graphics object.
+	 * @param x The x-coordinate of the center of the
+	 *          circle.
+	 * @param y The y-coordinate of the center of the
+	 *          circle.
+	 * @param r The radius of the circle.
+	 * @param lineWidth Pen thickness of circle drawn.
+	 */
+	public static void drawCircle(Graphics g,
+			int x, int y, int r,
+			int lineWidth) {
+		r = r+lineWidth/2;  
+		for(int i=0; i<lineWidth; i++) {
+			drawCircle(g, x, y, r);
+			if ((i+1)<lineWidth) {
+				drawCircle(g, x+1, y, r-1);
+				drawCircle(g, x-1, y, r-1);
+				drawCircle(g, x, y+1, r-1);
+				drawCircle(g, x, y-1, r-1);
+				r = r-1;
+			}
+		}
+	}
+
+	/**
 	 * Fait clignoter l'interface (par exemple lorsqu'un point
-	 * a ï¿½tï¿½ marquï¿½).
+	 * a été marqué).
 	 */
 	protected void blink()
 	{
 		for (int i = 3; i > 0; i--) {
 			death_mode = true;
 			repaint();
-			
+
 			try {
 				Thread.sleep(300); 
 			} catch (InterruptedException e) {}
@@ -249,7 +316,7 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	/**
 	 * Joue un son.
 	 * 
-	 * @param sound Fichier contenant le son ï¿½ jouer
+	 * @param sound Fichier contenant le son à jouer
 	 */
 	protected void playSound(String sound) {
 		Thread t = new Sound(sound);
@@ -259,7 +326,7 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	}
 	
 	/**
-	 * Affiche l'ï¿½tat des scores
+	 * Affiche l'état des scores
 	 */
 	private void displayScores() {
 		offscreeng.drawString(String.format("Joueur 1 : %d", joueur1_score), (getWidth() / 10), 35);
@@ -267,7 +334,7 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	}
 	
 	/**
-	 * Appelï¿½e lorsqu'un mur a ï¿½tï¿½ touchï¿½.
+	 * Appelée lorsqu'un mur a été touché.
 	 */
 	protected void onWallTouched() {
 		displayScores();
@@ -276,7 +343,7 @@ public abstract class PongBase extends JFrame implements Runnable, MouseListener
 	}
 	
 	/*
-	 * Les mï¿½thodes suivantes sont requises par l'interface MouseListener
+	 * Les méthodes suivantes sont requises par l'interface MouseListener
 	 * mais ne nous sont pas utiles ...
 	 */
 	@Override
