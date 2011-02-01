@@ -13,8 +13,9 @@ public class NetworkConnection {
 	
 	private int to_confirm = 0;
 	
+	
 	/**
-	 * Crée une connexion "client"
+	 * CrÃ©e une connexion "client"
 	 * 
 	 * @throws SocketException En cas d'erreur
 	 */
@@ -23,7 +24,7 @@ public class NetworkConnection {
 	}
 	
 	/**
-	 * Crée une connexion "serveur"
+	 * CrÃ©e une connexion "serveur"
 	 * 
 	 * @param port Port du serveur
 	 * 
@@ -34,9 +35,9 @@ public class NetworkConnection {
 	}
 	
 	/**
-	 * Reçoit des données en mode bloquant.
+	 * ReÃ§oit des donnÃ©es en mode bloquant.
 	 * 
-	 * @return Paquet Les données reçues.
+	 * @return Paquet Les donnÃ©es reÃ§ues.
 	 * 
 	 * @throws IOException Si une erreur survient
 	 */
@@ -45,11 +46,11 @@ public class NetworkConnection {
 	}
 	
 	/**
-	 * Reçoit des données en mode NON bloquant.
+	 * ReÃ§oit des donnÃ©es en mode NON bloquant.
 	 * 
-	 * @param timeout Le timeout au-delà duquel on stoppe l'attente
+	 * @param timeout Le timeout au-delÃ  duquel on stoppe l'attente
 	 * 
-	 * @return Paquet Les données reçues.
+	 * @return Paquet Les donnÃ©es reÃ§ues.
 	 * 
 	 * @throws IOException Si une erreur survient
 	 */
@@ -61,12 +62,12 @@ public class NetworkConnection {
 		
 		String[] data = paquet.getMessage().split(" ");
 			
-		// on regarde si le message nécessite une confirmation
+		// on regarde si le message nÃ©cessite une confirmation
 		if(data.length > 1) {
 			try {
 				confirm(paquet.getDatagram(), Integer.parseInt(data[0]));
 				
-				// reconstruction d'un paquet sans le numéro du paquet
+				// reconstruction d'un paquet sans le numÃ©ro du paquet
 				String new_msg = paquet.getMessage().substring(data[0].length() + 1);
 				
 				paquet.setMessage(new_msg);
@@ -83,7 +84,7 @@ public class NetworkConnection {
 		try {
 			sock.setSoTimeout(timeout);
 		} catch (SocketException e) {
-			throw new IOException("Impossible de définir le timeout pour la réception");
+			throw new IOException("Impossible de dÃ©finir le timeout pour la rÃ©ception");
 		}
 		
 		byte[] buffer = new byte[1024];
@@ -94,7 +95,7 @@ public class NetworkConnection {
 			
 			return new Paquet(p);
 		} catch (SocketTimeoutException e) {
-			// on ignore : null sera retourné
+			// on ignore : null sera retournï¿½
 		}
 		
 		return null;
@@ -126,29 +127,29 @@ public class NetworkConnection {
 				return;
 		}
 		
-		throw new IOException("La confirmation du message \""+msg+"\" n'est pas arrivée");
+		throw new IOException("La confirmation du message \""+msg+"\" n'est pas arrivÃ©e");
 	}
 	
 	/**
 	 * Envoie un message sans confirmation.
 	 * 
-	 * @param addr Adresse de l'hôte à contacter
-	 * @param port Port de l'hôte à contacter
-	 * @param msg Message à envoyer
+	 * @param addr Adresse de l'hÃ´te Ã  contacter
+	 * @param port Port de l'hÃ´te Ã  contacter
+	 * @param msg Message Ã  envoyer
 	 * 
-	 * @throws IOException Si on ne parvient pas ï¿½ envoyer le message 
+	 * @throws IOException Si on ne parvient pas Ã  envoyer le message 
 	 */
 	public void send(InetAddress addr, int port, String msg) throws IOException {
 		sock.send(new DatagramPacket(msg.getBytes(), msg.length(), addr, port));
 	}
 	
 	/**
-	 * Envoie la confirmation pour accuser réception d'un message
+	 * Envoie la confirmation pour accuser rÃ©ception d'un message
 	 *  
-	 * @param p DatagramPacket dont on confirme la réception
+	 * @param p DatagramPacket dont on confirme la rÃ©ception
 	 * @param msg_no Identifiant du message contenu dans le paquet
 	 * 
-	 * @throws IOException Si l'envoi échoue
+	 * @throws IOException Si l'envoi Ã©choue
 	 */
 	private void confirm(DatagramPacket p, int msg_no) throws IOException {
 		String msg = String.format("%d OK", msg_no);
@@ -157,7 +158,7 @@ public class NetworkConnection {
 	}
 	
 	/**
-	 * On ferme proprement la socket dès que l'objet est détruit
+	 * On ferme proprement la socket dÃ¨s que l'objet est dï¿½truit
      *
      * @throws Throwable Bouh
      */

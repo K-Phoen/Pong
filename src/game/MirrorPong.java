@@ -58,7 +58,7 @@ public class MirrorPong extends PongBase {
 		try {
 			sock = new NetworkConnection(port);
 		} catch (IOException e) {
-			System.err.println("Erreur au lancement du serveur : " + e);
+			showAlert("Erreur au lancement du serveur : " + e);
 			System.exit(1);
 		}
 
@@ -68,7 +68,7 @@ public class MirrorPong extends PongBase {
 		// attente de la connexion du second joueur
 		Paquet p = null;
 		String msg = new String();
-		while(!msg.equals("HELLO"))
+		while(!msg.equals("HELLO")) 
 		{
 			try {
 				p = sock.receive();
@@ -98,10 +98,10 @@ public class MirrorPong extends PongBase {
 	public void run() {
 
 		Paquet p;
-		while (true) { // en attendant d'avoir mieux
-			wait(10);
+		while (state != State.FINISHED) {
+			wait(8);
 			
-			if(is_paused)
+			if(state == State.PAUSED)
 				continue;
 			
 			try {
@@ -123,10 +123,9 @@ public class MirrorPong extends PongBase {
 			sendToDistantPlayer(String.format("%s %d %d", MSG_BALL, ballPoint.x, ballPoint.y));
 
 			repaint();
-			
-			if(joueur1_score == max_points || joueur2_score == max_points)
-				break;
 		}
+		
+		// partie terminée
 		
 		String winner = (joueur1_score == max_points) ? "P1" : "P2";
 		
@@ -159,12 +158,13 @@ public class MirrorPong extends PongBase {
 	 */
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (is_game_started)
+		if (state != State.WAITING)
 			return;
 		
 		ballSpeed.x = 4;
 		ballSpeed.y = 2;
-		is_game_started = true; // demarre le jeu
+		
+		state = State.STARTED; // demarre le jeu
 	}
 
 	/**
@@ -242,17 +242,22 @@ public class MirrorPong extends PongBase {
 			joueur1_score++;
 		else
 			joueur2_score++;
+		
+		// ici, soit le jeu est terminé, soit on est en attente de la relance
+		state = (joueur1_score == max_points || joueur2_score == max_points)
+				? State.FINISHED
+				: State.WAITING;
 
+		// envoi des scores
 		sendToDistantPlayer(MSG_SCORE + " P1 " + joueur1_score);
 		sendToDistantPlayer(MSG_SCORE + " P2 " + joueur2_score);
 
+		// envoi de l'info "mur touché"
 		sendToDistantPlayer(MSG_WALL_TOUCHED);
 
 		super.onWallTouched();
 
 		resetBall();
-
-		is_game_started = false;
 	}
 
 	/**
@@ -267,17 +272,14 @@ public class MirrorPong extends PongBase {
 		try {
 			sock.send(distant_player_host, distant_player_port, msg);
 		} catch (IOException e) {
-			System.err.println("Erreur à l'envoi de données vers le client : "+ e);
-			System.err.println("Message à envoyer : "+ msg);
+			showAlert("Erreur à l'envoi de données vers le client : "+ e);
 		}
 	}
 
 	@Override
 	protected void onGameOver(String winner) {
-		if(winner.equals("P1"))
-			System.out.println("J'ai gagné \\o/");
-		else
-			System.out.println("J'ai perdu [-_-]\"");
+		showAlert(winner.equals("P1")
+				  ? "Vous avez gagné \\o/" : "Vous avez perdu [-_-]\"");
 	}
 
 

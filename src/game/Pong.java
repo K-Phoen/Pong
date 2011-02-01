@@ -30,7 +30,7 @@ public class Pong extends PongBase {
 				port = Integer.parseInt(args[0]);
 			} catch(NumberFormatException e) {
 				System.err.println("Port incorrect : utilisation du port 6000");
-				// on ne modifie pas le port par défaut
+				// on ne modifie pas le port par dÃ©faut
 			}
 			
 			host = args[1];
@@ -42,14 +42,14 @@ public class Pong extends PongBase {
 	
 	/**
 	 * Connexion serveur avant l'initialisation de la partie graphique
-	 * et du jeu en lui même.
+	 * et du jeu en lui mÃªme.
 	 */
 	@Override
 	public void start() {
 		try {
 			host_address = InetAddress.getByName(host);
 		} catch (UnknownHostException e) {
-			System.err.println("Impossible de contacter le serveur : " + e);
+			showAlert("Impossible de contacter le serveur : " + e);
 			System.exit(1);
 		}
 		
@@ -57,19 +57,19 @@ public class Pong extends PongBase {
 		try{
 			sock = new NetworkConnection();
 		} catch (IOException e) {
-			System.err.println("Erreur à la connexion : " + e.getMessage());
+			showAlert("Erreur Ã  la connexion : " + e.getMessage());
 			System.exit(1);
 		}
 		
 		initGUI("Pong");
 		
-		// un espèce de handshake
+		// un espÃ¨ce de handshake
 		while(true) {
 			try {
-				sock.sendAndWaitConfirm(host_address, port, "HELLO", 1000);
+				sock.sendAndWaitConfirm(host_address, port, "HELLO", 2000);
 				break;
 			} catch (IOException e) {
-				System.err.println("Erreur à l'envoi de la demande de connexion au serveur : " + e.getMessage());
+				showAlert("Erreur Ã  l'envoi de la demande de connexion au serveur : " + e.getMessage());
 			}
 		}
 		
@@ -77,15 +77,14 @@ public class Pong extends PongBase {
 	}
 	
 	/**
-	 * On met à jour le jeu selon les infos transmises par le serveur
+	 * On met Ã  jour le jeu selon les infos transmises par le serveur
 	 * 
-	 * @note Sera appelée par le thread.
+	 * @note Sera appelÃ©e par le thread.
 	 */
 	@Override
 	public void run() {
-		
 		Paquet p;
-		while (true) {
+		while (state != State.FINISHED) {
 			wait(5);
 			
 			try {
@@ -97,7 +96,7 @@ public class Pong extends PongBase {
 			if(p != null && p.getMessage() != null)
 				executeCmd(p.getMessage());
 			
-			if(is_paused) 
+			if(state == State.PAUSED) 
 				continue;
 
 			repaint();
@@ -105,12 +104,12 @@ public class Pong extends PongBase {
 	}
 	
 	/**
-	 * Met à jour la position du pavé du joueur 2 par rapport
+	 * Met Ã  jour la position du pavÃ© du joueur 2 par rapport
 	 * aux mouvements de la souris
 	 * 
 	 * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
 	 * 
-	 * @param e Event lié à la souris
+	 * @param e Event liÃ© Ã  la souris
 	 */
 	@Override
 	public void mouseMoved(MouseEvent e) {
@@ -119,15 +118,15 @@ public class Pong extends PongBase {
 		try {
 			sock.send(host_address, port, MSG_MOVE + " P2 " + joueur2.y);
 		} catch (IOException ex) {
-			System.err.println("Erreur à l'envoi des coordonnées du pavé vers le serveur : "+ ex);
+			showAlert("Erreur Ã  l'envoi des coordonnÃ©es du pavÃ© vers le serveur : "+ ex);
 		}
 	}
 	
 	@Override
 	protected void onGameOver(String winner) {
-		if(winner.equals("P2"))
-			System.out.println("J'ai gagné \\o/");
-		else
-			System.out.println("J'ai perdu [-_-]\"");
+		state = State.FINISHED;
+		
+		showAlert(winner.equals("P2")
+				  ? "Vous avez gagnÃ© \\o/" : "Vous avez perdu [-_-]\"");
 	}
 }
