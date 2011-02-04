@@ -1,4 +1,3 @@
-.*.swp
-*.class
-.settings/
-bin/
+build/
+dist/
+nbproject/private/
