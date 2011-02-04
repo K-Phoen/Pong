@@ -15,31 +15,31 @@ public class MirrorPong extends PongBase {
 	 */
 	private static final long serialVersionUID = 7224334478468671910L;
 
-	private static int server_port = 6000;
-	
+	private int server_port = 6000;
+
 	/**
 	 * Nombre de points à atteindre pour remporter le match
 	 */
-	private int max_points = 0;
+	private int max_points = 1;
 
 
 	/**
 	 * Programme principal
-	 * 
+	 *
 	 * @param arg
 	 */
 	public static void main(String[] args) {
 		MirrorPong jp = new MirrorPong();
-		
+
 		if(args.length == 1) {
 			try {
-				server_port = Integer.parseInt(args[0]);
+				jp.setPort(Integer.parseInt(args[0]));
 			} catch(NumberFormatException e) {
 				System.err.println("Port incorrect : utilisation du port 6000");
 				// on ne modifie pas le port par défaut
 			}
 		}
-		
+
 		jp.start();
 	}
 
@@ -65,32 +65,53 @@ public class MirrorPong extends PongBase {
 		// attente de la connexion du second joueur
 		Paquet p = null;
 		String msg = new String();
-		while(!msg.equals("HELLO")) 
+		while(!msg.equals("HELLO"))
 		{
 			try {
 				p = sock.receive();
 			} catch (IOException e) {
 				continue;
 			}
-			
+
 			if(p == null)
 				continue;
-			
+
 			msg = p.getMessage();
 		}
-		
+
 		state = State.READY;
 
 		setDistantHost(p.getDatagram().getAddress());
 		setDistantPort(p.getDatagram().getPort());
-		
+
 		super.start();
 	}
+
+    /**
+     *
+     * @param max
+     * @throws IllegalArgumentException
+     */
+    public void setMaxPoints(int max) throws IllegalArgumentException
+    {
+        if(max < 1)
+            throw new IllegalArgumentException("Nombre de points maximal incorrect : doit être supérieur à 0");
+
+        max_points = max;
+    }
+
+    public void setPort(int port) throws IllegalArgumentException
+    {
+        if(port <= 0)
+            throw new IllegalArgumentException("Port incorrect");
+
+        server_port = port;
+    }
 
 	/**
 	 * On met à jour les mouvements des joueurs dans l'affichage après avoir
 	 * effectué quelques vérifications sur l'état du jeu et déplacé la balle.
-	 * 
+	 *
 	 * @note Sera appelée par le thread.
 	 */
 	@Override
@@ -99,16 +120,16 @@ public class MirrorPong extends PongBase {
 		Paquet p;
 		while (state != State.FINISHED) {
 			wait(8);
-			
+
 			if(state == State.PAUSED)
 				continue;
-			
+
 			try {
 				p = sock.tryReceive(5);
 			} catch (IOException e) {
 				p = null;
 			}
-			
+
 			if(p != null && p.getMessage() != null)
 				executeCmd(p.getMessage());
 
@@ -123,11 +144,11 @@ public class MirrorPong extends PongBase {
 
 			repaint();
 		}
-		
+
 		// partie terminée
-		
+
 		String winner = (joueur1_score == max_points) ? "P1" : "P2";
-		
+
 		sendToDistantPlayer(String.format("%s %s", MSG_GAME_OVER, winner));
 		onGameOver(winner);
 	}
@@ -135,34 +156,34 @@ public class MirrorPong extends PongBase {
 	/**
 	 * Met à jour la position du pavé du joueur 2 par rapport
 	 * aux mouvements de la souris
-	 * 
+	 *
 	 * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
-	 * 
+	 *
 	 * @param e Event lié à la souris
 	 */
 	@Override
 	public void mouseMoved(MouseEvent e) {
 		joueur1.y = e.getY() - 25;
-		
+
 		// envoi de la position du joueur 1
 		sendToDistantPlayer(String.format("%s P1 %d", MSG_MOVE, joueur1.y));
 	}
-	
+
 	/**
 	 * (Re)démarre le jeu s'il est arrêté (pas commencé ou point marqué)
-	 * 
+	 *
 	 * @param e Event lié à la souris
-	 * 
+	 *
 	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
 	 */
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (state != State.READY)
 			return;
-		
+
 		ballSpeed.x = 4;
 		ballSpeed.y = 2;
-		
+
 		state = State.STARTED; // demarre le jeu
 		sendToDistantPlayer(MSG_GAME_STARTED);
 	}
@@ -178,39 +199,39 @@ public class MirrorPong extends PongBase {
 	/**
 	 * Teste la collision entre la balle et un joueur,
 	 * et lance les actions associées si elle est avérée
-	 * 
+	 *
 	 * @param player Joueur dont on veut tester la collision avec la balle.
 	 */
 	private void checkPlayerCollision(Point player) {
 		if(!checkCollision(player))
 			return;
-		
+
 		int racketHit = ballPoint.y - (player.y + 25);
-		
+
 		ballSpeed.y += racketHit / 7;
 		ballSpeed.x = -ballSpeed.x;
-		
+
 		sendToDistantPlayer(MSG_CONTACT);
 		playSound(SOUND_CONTACT);
 	}
-	
+
 	/**
 	 * Teste la collision entre la balle et la raquette d'un joueur
-	 * 
+	 *
 	 * @param joueur Position de la raquette du joueur
-	 * 
+	 *
 	 * @return True s'il y a collision, false sinon
 	 */
 	private boolean checkCollision(Point joueur) {
-		Rectangle joueur_zone = new Rectangle(joueur.x, joueur.y, 
+		Rectangle joueur_zone = new Rectangle(joueur.x, joueur.y,
 											  racket_width, racket_height);
 		Rectangle balle_zone = new Rectangle(ballPoint.x - ball_width / 2,
 											 ballPoint.y - ball_height / 2,
 											 ball_width, ball_height);
-		
+
 		return joueur_zone.intersects(balle_zone);
 	}
-	
+
 	/**
 	 * Vérifie que la balle ne soit pas en collision avec un mur.
 	 */
@@ -225,7 +246,7 @@ public class MirrorPong extends PongBase {
 			onWallTouched();
 			return;
 		}
-		
+
 		// haut ou bas : la balle rebondit
 		if (ball_top <= plane.y || ball_bottom >= plane.height)
 			ballSpeed.y = -ballSpeed.y;
@@ -242,7 +263,7 @@ public class MirrorPong extends PongBase {
 			joueur1_score++;
 		else
 			joueur2_score++;
-		
+
 		// ici, soit le jeu est terminé, soit on est en attente de la relance
 		state = (joueur1_score == max_points || joueur2_score == max_points)
 				? State.FINISHED
@@ -259,7 +280,7 @@ public class MirrorPong extends PongBase {
 
 		resetBall();
 	}
-	
+
 	@Override
 	protected void onGameOver(String winner) {
 		showAlert(winner.equals("P1")
