@@ -26,7 +26,7 @@ import network.NetworkConnection;
 
 public abstract class PongBase extends JFrame implements KeyListener, Runnable, MouseListener, MouseMotionListener {
 
-	protected enum State {
+    protected enum State {
 		WAITING, READY, STARTED, PAUSED, FINISHED
 	}
 
@@ -91,6 +91,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	protected static final String MSG_GAME_OVER 	= "game_over";
 	protected static final String MSG_GAME_STARTED 	= "game_started";
 	protected static final String MSG_PAUSE		 	= "set_pause";
+    protected static final String MSG_STATE_CHANGED	= "state";
 
 	/**
 	 * Localisation des ressources sur le disque dur
@@ -228,7 +229,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		if(state != State.STARTED)
 			return;
 
-		state = State.PAUSED;
+		changeState(State.PAUSED);
 
 		if(forward_info)
 			sendToDistantPlayer(String.format("%s on", MSG_PAUSE));
@@ -245,13 +246,32 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		if(state != State.PAUSED)
 			return;
 
-		state = State.STARTED;
+		changeState(State.STARTED);
 
 		if(forward_info)
 			sendToDistantPlayer(String.format("%s off", MSG_PAUSE));
 
 		repaint();
 	}
+
+    protected void changeState(State new_sate) {
+        state = new_sate;
+    }
+
+    private void changeState(String state) {
+        if(state.equals(State.FINISHED.toString()))
+            changeState(State.FINISHED.toString());
+        else if(state.equals(State.PAUSED.toString()))
+            changeState(State.PAUSED);
+        else if(state.equals(State.READY.toString()))
+            changeState(State.READY);
+        else if(state.equals(State.STARTED.toString()))
+            changeState(State.STARTED);
+        else if(state.equals(State.WAITING.toString()))
+            changeState(State.WAITING);
+        else
+            throw new IllegalArgumentException("State inconnu");
+    }
 
 	/**
 	 * Servira à mettre le jeu en pause
@@ -295,8 +315,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 *
 	 * @param cmd Message à analyser
 	 */
-	protected void executeCmd(String cmd)
-	{
+	protected void executeCmd(String cmd) {
 		String[] args = cmd.split(" ");
 
 		/* commandes à un seul argument */
@@ -307,9 +326,6 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		} else if (args[0].equals(MSG_CONTACT)) {
 			playSound(SOUND_CONTACT);
 			return;
-		} else if (args[0].equals(MSG_GAME_STARTED)) {
-			state = State.STARTED;
-			return;
 		}
 
 
@@ -319,6 +335,8 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 			if (args[0].equals(MSG_GAME_OVER)) {
 				onGameOver(args[1]);
 				return;
+            } else if (args[0].equals(MSG_STATE_CHANGED)) {
+                changeState(args[1]);
 			} else if (args[0].equals(MSG_PAUSE)) {
 				if(args[1].equals("on"))
 					onGamePause(false);

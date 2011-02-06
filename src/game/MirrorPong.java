@@ -30,7 +30,7 @@ public class MirrorPong extends PongBase {
 	 */
 	public static void main(String[] args) {
 		MirrorPong jp = new MirrorPong();
-
+        
 		if(args.length == 1) {
 			try {
 				jp.setPort(Integer.parseInt(args[0]));
@@ -79,7 +79,7 @@ public class MirrorPong extends PongBase {
 			msg = p.getMessage();
 		}
 
-		state = State.READY;
+		changeState(State.READY);
 
 		setDistantHost(p.getDatagram().getAddress());
 		setDistantPort(p.getDatagram().getPort());
@@ -184,8 +184,7 @@ public class MirrorPong extends PongBase {
 		ballSpeed.x = 4;
 		ballSpeed.y = 2;
 
-		state = State.STARTED; // demarre le jeu
-		sendToDistantPlayer(MSG_GAME_STARTED);
+		changeState(State.STARTED); // demarre le jeu
 	}
 
 	/**
@@ -264,11 +263,6 @@ public class MirrorPong extends PongBase {
 		else
 			joueur2_score++;
 
-		// ici, soit le jeu est terminé, soit on est en attente de la relance
-		state = (joueur1_score == max_points || joueur2_score == max_points)
-				? State.FINISHED
-				: State.READY;
-
 		// envoi des scores
 		sendToDistantPlayer(MSG_SCORE + " P1 " + joueur1_score);
 		sendToDistantPlayer(MSG_SCORE + " P2 " + joueur2_score);
@@ -278,8 +272,20 @@ public class MirrorPong extends PongBase {
 
 		super.onWallTouched();
 
+        // ici, soit le jeu est terminé, soit on est en attente de la relance
+        changeState((joueur1_score == max_points || joueur2_score == max_points)
+                    ? State.FINISHED
+                    : State.READY);
+
 		resetBall();
 	}
+
+    @Override
+    protected void changeState(State new_sate) {
+        state = new_sate;
+
+        sendToDistantPlayer(String.format("%s %s", MSG_STATE_CHANGED, new_sate));
+    }
 
 	@Override
 	protected void onGameOver(String winner) {
