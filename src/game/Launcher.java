@@ -6,7 +6,7 @@ import java.util.List;
 import javax.swing.JOptionPane;
 
 
-public class JframePong extends javax.swing.JFrame {
+public class Launcher extends javax.swing.JFrame {
 
     private class PongLauncher extends Thread {
         private String host;
@@ -54,11 +54,11 @@ public class JframePong extends javax.swing.JFrame {
 
 
     /** Creates new form JframePong */
-    public JframePong() {
+    public Launcher() {
         initComponents();
 
         setVisible(true);
-        setTitle("Pong");
+        setTitle("Pong launcher");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 
@@ -115,18 +115,13 @@ public class JframePong extends javax.swing.JFrame {
             }
         });
 
-        jl_choice.setText("Choix");
-
-        tf_host.setText("localhost");
-
         jl_host.setText("Hôte");
-
         jl_port.setText("Port");
 
+        jl_choice.setText("Choix");
         jl_nb_games.setText("Nombre de jeux");
-
+        tf_host.setText("localhost");
         js_nb_games.setValue(5);
-
         js_port.setValue(6000);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -190,7 +185,7 @@ public class JframePong extends javax.swing.JFrame {
         );
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>                        
 
     private void Bouton_ValiderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Bouton_ValiderActionPerformed
         List<Thread> threads = new ArrayList<Thread>();
@@ -232,15 +227,9 @@ public class JframePong extends javax.swing.JFrame {
             threads.add(new MirrorPongLauncher(port, nb_games));
             threads.add(new PongLauncher(host, port));
         }
-
+        
         for(Thread t : threads)
             t.start();
-
-        for(Thread t : threads) {
-            try {
-                t.join();
-            } catch (InterruptedException ex) { }
-        }
     }//GEN-LAST:event_Bouton_ValiderActionPerformed
 
     private void ComboServerOrClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ComboServerOrClientActionPerformed
@@ -266,7 +255,7 @@ public class JframePong extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        new JframePong();
+        new Launcher();
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
