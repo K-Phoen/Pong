@@ -53,7 +53,7 @@ public class MirrorPong extends PongBase {
 	public void start() {
 		// lancement du serveur
 		try {
-			sock = new NetworkConnection(server_port);
+			sock = new NetworkConnection(-1);
 		} catch (IOException e) {
 			showAlert("Erreur au lancement du serveur : " + e);
 			System.exit(1);
@@ -62,11 +62,23 @@ public class MirrorPong extends PongBase {
 		// création de la GUI
 		initGUI("MirrorPong");
 
-		// attente de la connexion du second joueur
+        // attente d'un client
+        waitClient();
+
+		changeState(State.READY);
+
+		super.start();
+	}
+
+    /**
+     * Attent qu'un client se connecte pour enregistrer son adresse et son
+     * port
+     */
+    private void waitClient() {
+        // attente de la connexion du second joueur
 		Paquet p = null;
 		String msg = new String();
-		while(!msg.equals("HELLO"))
-		{
+		while(!msg.equals("HELLO")) {
 			try {
 				p = sock.receive();
 			} catch (IOException e) {
@@ -79,18 +91,17 @@ public class MirrorPong extends PongBase {
 			msg = p.getMessage();
 		}
 
-		changeState(State.READY);
-
 		setDistantHost(p.getDatagram().getAddress());
 		setDistantPort(p.getDatagram().getPort());
-
-		super.start();
-	}
+    }
 
     /**
+     * Fixe le nombre de points à atteindre pour gagner une partie
      *
-     * @param max
-     * @throws IllegalArgumentException
+     * @param max Nombre de points à atteintre pour gagner une partie
+     *
+     * @throws IllegalArgumentException Si le nombre de points est strictement
+     *                                  inférieur à 1
      */
     public void setMaxPoints(int max) throws IllegalArgumentException
     {
@@ -100,6 +111,13 @@ public class MirrorPong extends PongBase {
         max_points = max;
     }
 
+    /**
+     * Définit le port sur lequel devra fonctionner le serveur
+     *
+     * @param port Port d'écoute du serveur
+     *
+     * @throws IllegalArgumentException Si le port est inférieur ou égal à 0
+     */
     public void setPort(int port) throws IllegalArgumentException
     {
         if(port <= 0)
@@ -125,7 +143,7 @@ public class MirrorPong extends PongBase {
 				continue;
 
 			try {
-				p = sock.tryReceive(5);
+				p = sock.tryReceive(8);
 			} catch (IOException e) {
 				p = null;
 			}
@@ -211,7 +229,7 @@ public class MirrorPong extends PongBase {
 		ballSpeed.x = -ballSpeed.x;
 
 		sendToDistantPlayer(MSG_CONTACT);
-		playSound(SOUND_CONTACT);
+		Sound.play(SOUND_CONTACT);
 	}
 
 	/**
@@ -253,8 +271,8 @@ public class MirrorPong extends PongBase {
 
 	/**
 	 * La balle a heurté un mur (derrière un des deux pavés).
-	 * On regarde de quel côté la balle touche le mur, ont met
-	 * les scores à jour et on les envoie au client
+	 * On regarde de quel côté la balle touche le mur, ont met les scores à
+     * jour et on les envoie au client
 	 */
 	@Override
 	protected void onWallTouched() {
@@ -280,13 +298,23 @@ public class MirrorPong extends PongBase {
 		resetBall();
 	}
 
+    /**
+     * Chaque fois que l'état du jeu change, on prévient le client
+     *
+     * @param new_sate Nouvel état du jeu
+     */
     @Override
     protected void changeState(State new_sate) {
-        state = new_sate;
+        super.changeState(new_sate);
 
         sendToDistantPlayer(String.format("%s %s", MSG_STATE_CHANGED, new_sate));
     }
 
+    /**
+     * Appelée dès que la partie est terminée
+     *
+     * @param winner Identifiant du vainqueur
+     */
 	@Override
 	protected void onGameOver(String winner) {
 		showAlert(winner.equals("P1")

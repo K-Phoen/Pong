@@ -185,7 +185,7 @@ public class Launcher extends javax.swing.JFrame {
         );
 
         pack();
-    }// </editor-fold>                        
+    }// </editor-fold>
 
     private void Bouton_ValiderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Bouton_ValiderActionPerformed
         List<Thread> threads = new ArrayList<Thread>();

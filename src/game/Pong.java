@@ -84,10 +84,10 @@ public class Pong extends PongBase {
 	public void run() {
 		Paquet p;
 		while (state != State.FINISHED) {
-			wait(5);
+			wait(8);
 
 			try {
-				p = sock.tryReceive(5);
+				p = sock.tryReceive(8);
 			} catch (IOException e) {
 				p = null;
 			}

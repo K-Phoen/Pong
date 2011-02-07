@@ -21,23 +21,41 @@ public class Sound extends Thread {
     private static HashMap<String, AudioFormat> formats = new HashMap<String, AudioFormat>();
     private String sound_to_play;
 
-    public Sound(String sound) {
+
+    /**
+     * Crée une instance de la classe Sound. Elle sera chargée de lire un son
+     * dans un thread
+     *
+     * @param sound Son à lire
+     */
+    private Sound(String sound) {
         sound_to_play = sound;
     }
 
+    /**
+     * Lance le thread de lecture du son : ne pas appeler directement !
+     */
     @Override
     public void run() {
         try {
-            play(sound_to_play);
+            doPlay(sound_to_play);
         } catch (Exception e) {
-            System.err.println("Erreur à la lecture du son : "+e);
+            System.err.println("Erreur à la lecture du son : "+e.getMessage());
         }
     }
 
+    /**
+     * Charge un fichier son en mémoire
+     *
+     * @param filename Adresse du fichier à charger
+     *
+     * @throws UnsupportedAudioFileException Si le fichier ne contient pas du
+     *                                       son ou n'est pas reconnu par le système
+     * @throws IOException Si une erreur survient à la lecture du fichier
+     */
     public static void load(String filename) throws UnsupportedAudioFileException, IOException {
-        if (streams.containsKey(filename)) {
+        if (streams.containsKey(filename))
             return;
-        }
 
         AudioInputStream stream = AudioSystem.getAudioInputStream(new File(filename));
         AudioFormat format = stream.getFormat();
@@ -56,7 +74,28 @@ public class Sound extends Thread {
         return samples;
     }
 
-    public static void play(String filename) throws UnsupportedAudioFileException, IOException {
+    /**
+     * Joue un son dans un thread
+     *
+     * @param sound Chemin du fichier contenant le son à jouer
+     */
+    public static void play(String sound) {
+        Thread t = new Sound(sound);
+		//t.setPriority(Thread.MIN_PRIORITY);
+
+		t.start();
+    }
+
+    /**
+     * Réalise la lecture du son
+     *
+     * @param sound Chemin du fichier contenant le son à jouer
+     *
+     * @throws UnsupportedAudioFileException Si le fichier ne contient pas du
+     *                                       son ou n'est pas reconnu par le système
+     * @throws IOException Si une erreur survient à la lecture du fichier
+     */
+    private static void doPlay(String filename) throws UnsupportedAudioFileException, IOException {
         if (!streams.containsKey(filename))
             load(filename);
 
@@ -77,12 +116,13 @@ public class Sound extends Thread {
         }
 
         line.start();
+        
         int numBytesRead = 0;
         while (numBytesRead != -1) {
             numBytesRead = source.read(buffer, 0, buffer.length);
-            if (numBytesRead != -1) {
+            
+            if (numBytesRead != -1)
                 line.write(buffer, 0, numBytesRead);
-            }
         }
 
         line.drain();
@@ -91,6 +131,10 @@ public class Sound extends Thread {
         source.reset();
     }
 
+    /**
+     * Petit test de lecture d'un son sans pré-chargement
+     * @param args
+     */
     public static void main(String[] args) {
         try {
             Sound.play("./data/pong_1.wav");

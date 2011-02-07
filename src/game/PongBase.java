@@ -18,6 +18,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import javax.imageio.ImageIO;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -97,6 +98,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 * Localisation des ressources sur le disque dur
 	 */
 	protected static final String SOUND_CONTACT = "./data/pong.wav";
+    protected static final String SOUND_START   = "./data/baseball.wav";
 	protected static final String IMG_BALL 		= "./data/ball.png";
 	protected static final String IMG_RACKET_P1	= "./data/raquette.png";
 	protected static final String IMG_RACKET_P2	= "./data/raquette2.png";
@@ -154,7 +156,25 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 		// actualisation de l'affichage
 		repaint();
+
+        // chargement des sons
+        loadSounds();
 	}
+
+    /**
+     * Pré-charge les sons de manières à ce qu'ils puissent être joués
+     * immédiatement lors de l'appel à Sound.play()
+     */
+    private void loadSounds()
+    {
+        try {
+            Sound.load(SOUND_CONTACT);
+        } catch (UnsupportedAudioFileException ex) {
+            showAlert("Impossible de charger les sons : "+ex.getLocalizedMessage());
+        } catch (IOException ex) {
+            showAlert("Impossible de charger les sons : "+ex.getLocalizedMessage());
+        }
+    }
 
 	public void setDistantHost(String host) throws UnknownHostException {
 		distant_player_host = InetAddress.getByName(host);
@@ -254,27 +274,47 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		repaint();
 	}
 
+    /**
+     * Change l'état actuel du jeu
+     *
+     * @param new_sate Nouvel état
+     */
     protected void changeState(State new_sate) {
         state = new_sate;
+
+        // lancement du jeu
+        if(new_sate == State.STARTED && joueur1_score == 0 && joueur2_score == 0)
+            Sound.play(SOUND_START);
     }
 
+    /**
+     * Change l'état actuel du jeu
+     *
+     * @param new_sate Nouvel état sous forme de chaine de caractères
+     *
+     * @see PongBase.changeState()
+     */
     private void changeState(String state) {
+        State s;
+        
         if(state.equals(State.FINISHED.toString()))
-            changeState(State.FINISHED.toString());
+            s = State.FINISHED;
         else if(state.equals(State.PAUSED.toString()))
-            changeState(State.PAUSED);
+            s = State.PAUSED;
         else if(state.equals(State.READY.toString()))
-            changeState(State.READY);
+            s = State.READY;
         else if(state.equals(State.STARTED.toString()))
-            changeState(State.STARTED);
+            s = State.STARTED;
         else if(state.equals(State.WAITING.toString()))
-            changeState(State.WAITING);
+            s = State.WAITING;
         else
             throw new IllegalArgumentException("State inconnu");
+
+        changeState(s);
     }
 
 	/**
-	 * Servira à mettre le jeu en pause
+	 * Servira à mettre le jeu en pause lors de l'appui sur les touches P ou p
 	 */
 	@Override
 	public void keyPressed(KeyEvent e) {
@@ -324,7 +364,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 			onWallTouched();
 			return;
 		} else if (args[0].equals(MSG_CONTACT)) {
-			playSound(SOUND_CONTACT);
+			Sound.play(SOUND_CONTACT);
 			return;
 		}
 
@@ -532,18 +572,6 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 			wait(300);
 		}
-	}
-
-	/**
-	 * Joue un son.
-	 *
-	 * @param sound Fichier contenant le son à jouer
-	 */
-	protected void playSound(String sound) {
-		Thread t = new Sound(sound);
-		t.setPriority(Thread.MIN_PRIORITY);
-
-		t.start();
 	}
 
 	/**
