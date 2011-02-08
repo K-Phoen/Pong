@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.Random;
 
 import network.NetworkConnection;
 import network.Paquet;
@@ -136,14 +137,16 @@ public class MirrorPong extends PongBase {
 	@Override
 	public void run() {
 		Paquet p;
+        Random r = new Random();
+
 		while (currentState() != State.FINISHED) {
-			wait(8);
+			wait(5);
 
 			if(currentState() == State.PAUSED)
 				continue;
 
 			try {
-				p = sock.tryReceive(8);
+				p = sock.tryReceive(5);
 			} catch (IOException e) {
 				p = null;
 			}
@@ -153,13 +156,19 @@ public class MirrorPong extends PongBase {
 
 			checkPlayerCollision(joueur1);
 			checkPlayerCollision(joueur2);
+            checkWallCollision(wall);
 			checkWalls();
-
+            
 			moveBall();
+
+            if(r.nextInt(200) == 34)
+            {
+                moveWall();
+                wall.toggleVisibility();
+            }
 
 			// envoi de la position de la balle
 			sendToDistantPlayer(String.format("%s %d %d", MSG_BALL, ballPoint.x, ballPoint.y));
-
 			repaint();
 		}
 
@@ -170,6 +179,14 @@ public class MirrorPong extends PongBase {
 		sendToDistantPlayer(String.format("%s %s", MSG_GAME_OVER, winner));
 		onGameOver(winner);
 	}
+
+    private void moveWall() {
+        Random r = new Random();
+
+
+        wall.x = r.nextInt((int) effects_zone.getWidth()) + effects_zone_padding;
+        wall.y = r.nextInt((int) effects_zone.getHeight()) + effects_zone_padding;
+    }
 
 	/**
 	 * Met à jour la position du pavé du joueur 2 par rapport
@@ -215,7 +232,7 @@ public class MirrorPong extends PongBase {
 
 	/**
 	 * Teste la collision entre la balle et un joueur,
-	 * et lance les actions associées si elle est avérée
+	 * et lance les actions associées si elle est avérée.
 	 *
 	 * @param player Joueur dont on veut tester la collision avec la balle.
 	 */
@@ -224,6 +241,23 @@ public class MirrorPong extends PongBase {
 			return;
 
 		int racketHit = ballPoint.y - (player.y + 25);
+
+		ballSpeed.y += racketHit / 7;
+		ballSpeed.x = -ballSpeed.x;
+
+		sendToDistantPlayer(MSG_CONTACT);
+		Sound.play(SOUND_CONTACT);
+	}
+
+    private void checkWallCollision(Wall wall) {
+        Rectangle balle_zone = new Rectangle(ballPoint.x - ball_width / 2,
+											 ballPoint.y - ball_height / 2,
+											 ball_width, ball_height);
+
+        if(!wall.isVisible() || !wall.intersects(balle_zone))
+            return;
+
+		int racketHit = ballPoint.y - (wall.y + 25);
 
 		ballSpeed.y += racketHit / 7;
 		ballSpeed.x = -ballSpeed.x;

@@ -40,7 +40,7 @@ public class Sound extends Thread {
         try {
             doPlay(sound_to_play);
         } catch (Exception e) {
-            System.err.println("Erreur à la lecture du son : "+e.getMessage());
+            //System.err.println("Erreur à la lecture du son "+sound_to_play+" : "+e.getMessage());
         }
     }
 
@@ -89,7 +89,7 @@ public class Sound extends Thread {
     /**
      * Réalise la lecture du son
      *
-     * @param sound Chemin du fichier contenant le son à jouer
+     * @param filename Chemin du fichier contenant le son à jouer
      *
      * @throws UnsupportedAudioFileException Si le fichier ne contient pas du
      *                                       son ou n'est pas reconnu par le système

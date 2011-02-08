@@ -105,7 +105,7 @@ public class Launcher extends JFrame {
         setBounds(new java.awt.Rectangle(500, 200, 0, 0));
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setForeground(new java.awt.Color(255, 102, 0));
-
+        
         jl_title.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         jl_title.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jl_title.setText("Super Pong");

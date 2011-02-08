@@ -64,6 +64,9 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 */
 	private State state = State.WAITING;
 
+    protected Wall wall = new Wall(20, 75);
+    protected Rectangle effects_zone;
+
 	private Image offscreeni;
 	private Graphics offscreeng;
 	protected Rectangle plane;
@@ -73,6 +76,8 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 	final protected int racket_width = 13, racket_height = 75;
 	final protected int ball_width = 32, ball_height = 32;
+
+    final protected int effects_zone_padding = 100;
 
 	/**
 	 * Utilisée pour faire clignoter le jeu
@@ -136,9 +141,12 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 		// création du plateau de jeu
 		offscreeni = createImage(getWidth(), getHeight());
-
 		offscreeng = offscreeni.getGraphics();
 		setBackground(Color.black);
+
+        effects_zone = new Rectangle(effects_zone_padding, effects_zone_padding,
+                                     getWidth() - 2 * effects_zone_padding,
+                                     getHeight() - 2 * effects_zone_padding);
 
 		// on place les centres des raquettes
 		joueur2 = new Point(getWidth() - 35, getHeight() / 2 - 25);
@@ -175,9 +183,8 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
     {
         try {
             Sound.load(SOUND_CONTACT);
-        } catch (UnsupportedAudioFileException ex) {
-            showAlert("Impossible de charger les sons : "+ex.getLocalizedMessage());
-        } catch (IOException ex) {
+            Sound.load(SOUND_START);
+        } catch (Exception ex) {
             showAlert("Impossible de charger les sons : "+ex.getLocalizedMessage());
         }
     }
@@ -302,32 +309,6 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
         return state;
     }
 
-    /**
-     * Change l'état actuel du jeu
-     *
-     * @param state Nouvel état sous forme de chaine de caractères
-     *
-     * @see PongBase.changeState()
-     */
-    private void changeState(String state) {
-        State s;
-        
-        if(state.equals(State.FINISHED.toString()))
-            s = State.FINISHED;
-        else if(state.equals(State.PAUSED.toString()))
-            s = State.PAUSED;
-        else if(state.equals(State.READY.toString()))
-            s = State.READY;
-        else if(state.equals(State.STARTED.toString()))
-            s = State.STARTED;
-        else if(state.equals(State.WAITING.toString()))
-            s = State.WAITING;
-        else
-            throw new IllegalArgumentException("State inconnu");
-
-        changeState(s);
-    }
-
 	/**
 	 * Servira à mettre le jeu en pause lors de l'appui sur les touches P ou p
      *
@@ -335,7 +316,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
      */
 	@Override
 	public void keyPressed(KeyEvent e) {
-		char c =e.getKeyChar();
+		char c = e.getKeyChar();
 
 		if(c == 'p' || c == 'P') {
 			if(state == State.PAUSED)
@@ -395,7 +376,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 				onGameOver(args[1]);
 				return;
             } else if (args[0].equals(MSG_STATE_CHANGED)) {
-                changeState(args[1]);
+                changeState(State.valueOf(args[1]));
 			} else if (args[0].equals(MSG_PAUSE)) {
 				if(args[1].equals("on"))
 					onGamePause(false);
@@ -472,6 +453,13 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 				offscreeng.drawImage(img_ball, ballPoint.x - ball_width / 2,
 									 ballPoint.y - ball_height / 2, null);
 			}
+
+            // affichage du mur
+            if(wall.isVisible()) {
+                offscreeng.setColor(Color.BLACK);
+                offscreeng.fillRect(wall.x, wall.y, (int) wall.getWidth(),
+                                    (int) wall.getHeight());
+            }
 		}
 
 		g.drawImage(offscreeni, 0, 10, this);
