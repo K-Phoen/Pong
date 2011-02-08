@@ -47,15 +47,16 @@ public class Pong extends PongBase {
 	/**
 	 * Connexion serveur avant l'initialisation de la partie graphique
 	 * et du jeu en lui même.
-	 */
+     *
+     * @throws IllegalStateException Si la connexion au serveur est impossible
+     */
 	@Override
-	public void start() {
+	public void start() throws IllegalStateException {
 		// connexion au serveur
 		try{
 			sock = new NetworkConnection();
 		} catch (IOException e) {
-			showAlert("Erreur à la connexion : " + e.getMessage());
-			System.exit(1);
+			throw new IllegalStateException("Erreur à la connexion : " + e.getMessage());
 		}
 
 		initGUI("Pong");
@@ -70,7 +71,7 @@ public class Pong extends PongBase {
 			}
 		}
 
-		state = State.READY;
+		changeState(State.READY);
 
 		super.start();
 	}
@@ -83,11 +84,11 @@ public class Pong extends PongBase {
 	@Override
 	public void run() {
 		Paquet p;
-		while (state != State.FINISHED) {
-			wait(8);
+		while (currentState() != State.FINISHED) {
+			wait(5);
 
 			try {
-				p = sock.tryReceive(8);
+				p = sock.tryReceive(5);
 			} catch (IOException e) {
 				p = null;
 			}
@@ -95,7 +96,7 @@ public class Pong extends PongBase {
 			if(p != null && p.getMessage() != null)
 				executeCmd(p.getMessage());
 
-			if(state == State.PAUSED)
+			if(currentState() == State.PAUSED)
 				continue;
 
 			repaint();
@@ -119,7 +120,7 @@ public class Pong extends PongBase {
 
 	@Override
 	protected void onGameOver(String winner) {
-		state = State.FINISHED;
+		changeState(State.FINISHED);
 
 		repaint();
 

@@ -3,18 +3,23 @@ package game;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 
-public class Launcher extends javax.swing.JFrame {
+public class Launcher extends JFrame {
+    private static final long serialVersionUID = 1L;
 
+    
     private class PongLauncher extends Thread {
         private String host;
         private int port;
+        private JFrame parent;
 
-        public PongLauncher(String host, int port) {
+        public PongLauncher(JFrame parent, String host, int port) {
             this.host = host;
             this.port = port;
+            this.parent = parent;
         }
 
         @Override
@@ -24,21 +29,28 @@ public class Launcher extends javax.swing.JFrame {
             try {
                 pong.setDistantHost(host);
                 pong.setDistantPort(port);
-            } catch (UnknownHostException ex) {
+            } catch (UnknownHostException e) {
+                JOptionPane.showMessageDialog(parent, e.getMessage());
                 return;
             }
 
-            pong.start();
+            try {
+                pong.start();
+            } catch (IllegalStateException e) {
+                JOptionPane.showMessageDialog(parent, e.getMessage());
+            }
         }
     }
 
     private class MirrorPongLauncher extends Thread {
         private int port;
         private int nb_games;
+        private JFrame parent;
 
-        public MirrorPongLauncher(int port, int nb_games) {
+        public MirrorPongLauncher(JFrame parent, int port, int nb_games) {
             this.port = port;
             this.nb_games = nb_games;
+            this.parent = parent;
         }
 
         @Override
@@ -48,7 +60,11 @@ public class Launcher extends javax.swing.JFrame {
             pong.setPort(port);
             pong.setMaxPoints(nb_games);
 
-            pong.start();
+            try {
+                pong.start();
+            } catch (IllegalStateException e) {
+                JOptionPane.showMessageDialog(parent, e.getMessage());
+            }
         }
     }
 
@@ -220,12 +236,12 @@ public class Launcher extends javax.swing.JFrame {
 
         //on verifie si on veut un serveur ou un client et on lance le jeu
         if (serverOrClient.equals("Serveur"))
-            threads.add(new MirrorPongLauncher(port, 5));
+            threads.add(new MirrorPongLauncher(this, port, nb_games));
         else if (serverOrClient.equals("Client"))
-            threads.add(new PongLauncher(host, port));
+            threads.add(new PongLauncher(this, host, port));
         else {
-            threads.add(new MirrorPongLauncher(port, nb_games));
-            threads.add(new PongLauncher(host, port));
+            threads.add(new MirrorPongLauncher(this, port, nb_games));
+            threads.add(new PongLauncher(this, host, port));
         }
         
         for(Thread t : threads)

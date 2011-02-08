@@ -26,7 +26,7 @@ public class MirrorPong extends PongBase {
 	/**
 	 * Programme principal
 	 *
-	 * @param arg
+	 * @param args arguments du programme (port)
 	 */
 	public static void main(String[] args) {
 		MirrorPong jp = new MirrorPong();
@@ -47,16 +47,17 @@ public class MirrorPong extends PongBase {
 	/**
 	 * Création du serveur avant l'initialisation de la partie graphique
 	 * et du jeu en lui même.
-	 */
+     *
+     * @throws IllegalStateException Si la création du serveur est impossible
+     */
 	@SuppressWarnings("null")
 	@Override
-	public void start() {
+	public void start() throws IllegalStateException {
 		// lancement du serveur
 		try {
 			sock = new NetworkConnection(server_port);
 		} catch (Exception e) {
-			showAlert("Erreur au lancement du serveur : " + e.getLocalizedMessage());
-			System.exit(1);
+			throw new IllegalStateException("Erreur au lancement du serveur : " + e.getLocalizedMessage());
 		}
 
 		// création de la GUI
@@ -134,12 +135,11 @@ public class MirrorPong extends PongBase {
 	 */
 	@Override
 	public void run() {
-
 		Paquet p;
-		while (state != State.FINISHED) {
+		while (currentState() != State.FINISHED) {
 			wait(8);
 
-			if(state == State.PAUSED)
+			if(currentState() == State.PAUSED)
 				continue;
 
 			try {
@@ -196,7 +196,7 @@ public class MirrorPong extends PongBase {
 	 */
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (state != State.READY)
+		if (currentState() != State.READY)
 			return;
 
 		ballSpeed.x = 4;

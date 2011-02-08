@@ -27,6 +27,9 @@ import network.NetworkConnection;
 
 public abstract class PongBase extends JFrame implements KeyListener, Runnable, MouseListener, MouseMotionListener {
 
+    /**
+     * Représente un état du jeu
+     */
     protected enum State {
 		WAITING, READY, STARTED, PAUSED, FINISHED
 	}
@@ -39,7 +42,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	/**
 	 * Thread qui sera chargé de la gestion du jeu
 	 */
-	protected Thread runner;
+	private Thread runner;
 
 	/**
 	 * Connexion au second joueur ou socket serveur
@@ -49,31 +52,32 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	/**
 	 * Adresse de l'hôte distant
 	 */
-	protected InetAddress distant_player_host;
+	private InetAddress distant_player_host;
 
 	/**
 	 * Port de l'hôte distant
 	 */
-	protected int distant_player_port = 6000;
+	private int distant_player_port = 6000;
 
 	/**
 	 * Etat actuel du jeu (lancé, en pause, etc.)
 	 */
-	protected State state = State.WAITING;
+	private State state = State.WAITING;
 
-	protected Image offscreeni;
-	protected Graphics offscreeng;
+	private Image offscreeni;
+	private Graphics offscreeng;
 	protected Rectangle plane;
+    private BufferedImage img_ball, img_raquette, img_raquette2;
+    
 	protected Point ballPoint, joueur1, joueur2, ballSpeed;
 
-	BufferedImage img_ball, img_raquette, img_raquette2;
-	final int racket_width = 13, racket_height = 75;
-	final int ball_width = 32, ball_height = 32;
+	final protected int racket_width = 13, racket_height = 75;
+	final protected int ball_width = 32, ball_height = 32;
 
 	/**
 	 * Utilisée pour faire clignoter le jeu
 	 */
-	protected boolean death_mode = false;
+	private boolean death_mode = false;
 
 	/**
 	 * Scores des deux joueurs
@@ -114,6 +118,8 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 	/**
 	 * Initialise la partie graphique.
+     *
+     * @param window_title Titre de la fenêtre
 	 */
 	protected void initGUI(String window_title) {
 		// caractéristiques de la fenêtre
@@ -288,9 +294,18 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
     }
 
     /**
+     * Retourne l'état actuel du jeu
+     *
+     * @return L'état courant du jeu
+     */
+    protected State currentState() {
+        return state;
+    }
+
+    /**
      * Change l'état actuel du jeu
      *
-     * @param new_sate Nouvel état sous forme de chaine de caractères
+     * @param state Nouvel état sous forme de chaine de caractères
      *
      * @see PongBase.changeState()
      */
@@ -315,7 +330,9 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 	/**
 	 * Servira à mettre le jeu en pause lors de l'appui sur les touches P ou p
-	 */
+     *
+     * @param e Event lié au clavier
+     */
 	@Override
 	public void keyPressed(KeyEvent e) {
 		char c =e.getKeyChar();
@@ -333,7 +350,9 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 	/**
 	 * Sera appelée lors de la fin d'une partie
-	 */
+     *
+     * @param winner Identifiant du vainqueur (P1 ou P2)
+     */
 	protected abstract void onGameOver(String winner);
 
 	/**
@@ -412,6 +431,8 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 	/**
 	 * Demande de re-dessiner l'interface
+     *
+     * @param g Element dans lequel on dessine
 	 */
 	@Override
 	public void update(Graphics g) {
@@ -420,13 +441,15 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 	/**
 	 * Dessine l'interface
-	 */
+     *
+     * @param g Element dans lequel on dessine
+     */
 	@Override
 	public void paint(Graphics g) {
 		if (offscreeng == null)
 			return;
 
-		offscreeng.setColor(new Color(244, 122, 0)); // orange fonc�
+		offscreeng.setColor(new Color(244, 122, 0)); // orange foncé
 		offscreeng.fillRect(0, 0, getWidth(), getHeight());
 		offscreeng.setColor(!death_mode ? Color.white : Color.red);
 
