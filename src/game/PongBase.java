@@ -289,13 +289,6 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	public void mouseClicked(MouseEvent e) { }
 
 	/**
-	 * Sera appelée lors de la fin d'une partie
-     *
-     * @param winner Identifiant du vainqueur (P1 ou P2)
-     */
-	protected abstract void onGameOver(String winner);
-
-	/**
 	 * Effectue un sleep
 	 *
 	 * @param delay Nombre de millisecondes à attendre
@@ -331,10 +324,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		/* commandes à deux arguments */
 
 		if(args.length == 2) {
-			if (args[0].equals(Constants.MSG_GAME_OVER)) {
-				onGameOver(args[1]);
-				return;
-            } else if (args[0].equals(Constants.MSG_STATE_CHANGED)) {
+			if (args[0].equals(Constants.MSG_STATE_CHANGED)) {
                 changeState(State.valueOf(args[1]));
                 return;
 			}

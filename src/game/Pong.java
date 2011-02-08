@@ -97,6 +97,10 @@ public class Pong extends PongBase {
 
             wait(5);
 		}
+
+        repaint();
+
+        onGameOver();
 	}
 
 	/**
@@ -130,11 +134,8 @@ public class Pong extends PongBase {
                                                    currentState()));
     }
 
-	@Override
-	protected void onGameOver(String winner) {
-		changeState(State.FINISHED);
-
-		repaint();
+	protected void onGameOver() {
+        String winner = (joueur1_score > joueur2_score) ? "P1" : "P2";
 
 		showAlert(winner.equals("P2")
 				  ? "Vous avez gagné \\o/" : "Vous avez perdu [-_-]\"");

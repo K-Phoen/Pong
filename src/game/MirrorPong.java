@@ -178,10 +178,10 @@ public class MirrorPong extends PongBase {
             wait(5);
 		}
 
-		// partie terminée
+        repaint();
 
-		String winner = (joueur1_score == max_points) ? "P1" : "P2";
-		onGameOver(winner);
+		// partie terminée
+		onGameOver();
 	}
 
     private void moveWall() {
@@ -353,12 +353,9 @@ public class MirrorPong extends PongBase {
 
     /**
      * Appelée dès que la partie est terminée
-     *
-     * @param winner Identifiant du vainqueur
      */
-	@Override
-	protected void onGameOver(String winner) {
-        sendToDistantPlayer(String.format("%s %s", Constants.MSG_GAME_OVER, winner));
+	protected void onGameOver() {
+        String winner = (joueur1_score == max_points) ? "P1" : "P2";
         
 		showAlert(winner.equals("P1")
 				  ? "Vous avez gagné \\o/" : "Vous avez perdu [-_-]\"");
