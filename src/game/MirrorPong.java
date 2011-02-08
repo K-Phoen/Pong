@@ -53,9 +53,9 @@ public class MirrorPong extends PongBase {
 	public void start() {
 		// lancement du serveur
 		try {
-			sock = new NetworkConnection(-1);
-		} catch (IOException e) {
-			showAlert("Erreur au lancement du serveur : " + e);
+			sock = new NetworkConnection(server_port);
+		} catch (Exception e) {
+			showAlert("Erreur au lancement du serveur : " + e.getLocalizedMessage());
 			System.exit(1);
 		}
 
