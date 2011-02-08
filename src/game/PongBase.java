@@ -57,7 +57,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 */
 	private State state = State.WAITING;
 
-    protected Wall wall = new Wall(20, 75);
+    protected Wall wall;
     protected Rectangle effects_zone;
 
 	private Image offscreeni;
@@ -118,9 +118,16 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
                                      getHeight() - 2 * effects_zone_padding);
 
 		// on place les centres des raquettes
-		joueur2 = new Point(getWidth() - 35, getHeight() / 2 - 25);
+		joueur2 = new Point(getWidth() - 45, getHeight() / 2 - 25);
 		joueur1 = new Point(35, getHeight() / 2 - 25);
 
+        // création du mur
+        try {
+            wall = new Wall(20, 75);
+        } catch (IOException e) {
+			showAlert("Impossible de charger le mur : "+e.getMessage());
+			System.exit(1);
+		}
 
 		// chargement de l'image de la balle et des raquettes
 		try {
@@ -386,23 +393,20 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 			// affichage des raquettes
 			offscreeng.drawImage(img_raquette2, joueur2.x, joueur2.y, null);
-			offscreeng.drawImage(img_raquette, joueur1.x,joueur1.y, null);
+			offscreeng.drawImage(img_raquette, joueur1.x, joueur1.y, null);
 
 			// affichage d'un message si besoin
 			if(!drawStateMessage()) {
 				drawGroundLines();
 
+                // affichage du mur
+                if(wall.isVisible())
+                    wall.drawOn(offscreeng);
+
 				// affichage de la balle
 				offscreeng.drawImage(img_ball, ballPoint.x - ball_width / 2,
 									 ballPoint.y - ball_height / 2, null);
 			}
-
-            // affichage du mur
-            if(wall.isVisible()) {
-                offscreeng.setColor(Color.BLACK);
-                offscreeng.fillRect(wall.x, wall.y, (int) wall.getWidth(),
-                                    (int) wall.getHeight());
-            }
 		}
 
 		g.drawImage(offscreeni, 0, 10, this);

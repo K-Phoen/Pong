@@ -11,8 +11,6 @@ public interface Constants {
 	static final String MSG_SCORE           = "score";
 	static final String MSG_CONTACT         = "contact";
 	static final String MSG_WALL_TOUCHED 	= "wall";
-	static final String MSG_GAME_OVER       = "game_over";
-	static final String MSG_GAME_STARTED 	= "game_started";
     static final String MSG_STATE_CHANGED	= "state";
 
 	/**
@@ -20,7 +18,9 @@ public interface Constants {
 	 */
 	static final String SOUND_CONTACT   = "./data/pong.wav";
     static final String SOUND_START     = "./data/baseball.wav";
+
 	static final String IMG_BALL 		= "./data/ball.png";
+    static final String IMG_WALL 		= "./data/mur.png";
 	static final String IMG_RACKET_P1	= "./data/raquette.png";
 	static final String IMG_RACKET_P2	= "./data/raquette2.png";
 

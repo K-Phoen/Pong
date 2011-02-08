@@ -162,9 +162,7 @@ public class MirrorPong extends PongBase {
 			moveBall();
 
             // gestion du mur "amovible"
-            if(currentState() != State.STARTED)
-                wall.setVisible(false);
-            else if(r.nextInt(200) == 34)
+            if(r.nextInt(200) == 34)
             {
                 moveWall();
                 wall.toggleVisibility();
