@@ -71,8 +71,6 @@ public class Pong extends PongBase {
 			}
 		}
 
-		changeState(State.READY);
-
 		super.start();
 	}
 
@@ -85,8 +83,6 @@ public class Pong extends PongBase {
 	public void run() {
 		Paquet p;
 		while (currentState() != State.FINISHED) {
-			wait(5);
-
 			try {
 				p = sock.tryReceive(5);
 			} catch (IOException e) {
@@ -96,10 +92,9 @@ public class Pong extends PongBase {
 			if(p != null && p.getMessage() != null)
 				executeCmd(p.getMessage());
 
-			if(currentState() == State.PAUSED)
-				continue;
-
 			repaint();
+
+            wait(5);
 		}
 	}
 
@@ -117,6 +112,20 @@ public class Pong extends PongBase {
 
 		sendToDistantPlayer(String.format("%s P2 %s", MSG_MOVE, joueur2.y));
 	}
+
+    @Override
+    protected void onGamePause() {
+        super.onGamePause();
+
+        sendToDistantPlayer(String.format("%s %s", MSG_STATE_CHANGED, currentState()));
+    }
+
+    @Override
+    protected void onGameResume() {
+        super.onGameResume();
+
+        sendToDistantPlayer(String.format("%s %s", MSG_STATE_CHANGED, currentState()));
+    }
 
 	@Override
 	protected void onGameOver(String winner) {

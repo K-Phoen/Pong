@@ -98,7 +98,6 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	protected static final String MSG_WALL_TOUCHED 	= "wall";
 	protected static final String MSG_GAME_OVER 	= "game_over";
 	protected static final String MSG_GAME_STARTED 	= "game_started";
-	protected static final String MSG_PAUSE		 	= "set_pause";
     protected static final String MSG_STATE_CHANGED	= "state";
 
 	/**
@@ -225,7 +224,6 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 			return;
 
 		runner = new Thread(this);
-		runner.setPriority(Thread.MAX_PRIORITY);
 
 		try {
 			runner.start();
@@ -251,36 +249,27 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		}
 	}
 
-	/**
-	 * Sera appelée lors de la sortie du mode pause
-	 *
-	 * @param forward_info Doit-on envoyer l'info à l'hôte distant ?
+
+    /**
+	 * Sera appelée lors du début du mode pause
 	 */
-	protected void onGamePause(boolean forward_info) {
+	protected void onGamePause() {
 		if(state != State.STARTED)
 			return;
 
 		changeState(State.PAUSED);
 
-		if(forward_info)
-			sendToDistantPlayer(String.format("%s on", MSG_PAUSE));
-
 		repaint();
 	}
 
-	/**
-	 * Sera appelée lors du début du mode pause
-	 *
-	 * @param forward_info Doit-on envoyer l'info à l'hôte distant ?
+    /**
+	 * Sera appelée lors de la sortie du mode pause
 	 */
-	protected void onGameResume(boolean forward_info) {
+	protected void onGameResume() {
 		if(state != State.PAUSED)
 			return;
 
 		changeState(State.STARTED);
-
-		if(forward_info)
-			sendToDistantPlayer(String.format("%s off", MSG_PAUSE));
 
 		repaint();
 	}
@@ -292,6 +281,8 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
      */
     protected void changeState(State new_state) {
         state = new_state;
+
+        System.out.println(state);
 
         // lancement du jeu
         if(new_state == State.STARTED && joueur1_score == 0 && joueur2_score == 0)
@@ -318,9 +309,9 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 		if(c == 'p' || c == 'P') {
 			if(state == State.PAUSED)
-				onGameResume(true);
+				onGameResume();
 			else
-				onGamePause(true);
+				onGamePause();
 		}
 	}
 
@@ -375,13 +366,6 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 				return;
             } else if (args[0].equals(MSG_STATE_CHANGED)) {
                 changeState(State.valueOf(args[1]));
-			} else if (args[0].equals(MSG_PAUSE)) {
-				if(args[1].equals("on"))
-					onGamePause(false);
-				else
-					onGameResume(false);
-
-				return;
 			}
 		}
 
@@ -482,6 +466,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 									  getWidth() / 2 - 40, getHeight() / 2);
 				break;
 			case PAUSED:
+                System.out.println("Paused");
 				offscreeng.setFont(new Font("Dialog", Font.BOLD, 40));
 				offscreeng.drawString("Pause", getWidth() / 2 - 50, getHeight() / 2 );
 				break;

@@ -140,19 +140,19 @@ public class MirrorPong extends PongBase {
         Random r = new Random();
 
 		while (currentState() != State.FINISHED) {
-			wait(5);
-
-			if(currentState() == State.PAUSED)
-				continue;
-
+            repaint();
+            
 			try {
 				p = sock.tryReceive(5);
 			} catch (IOException e) {
 				p = null;
 			}
 
-			if(p != null && p.getMessage() != null)
+            if(p != null && p.getMessage() != null)
 				executeCmd(p.getMessage());
+
+			if(currentState() == State.PAUSED)
+				continue;
 
 			checkPlayerCollision(joueur1);
 			checkPlayerCollision(joueur2);
@@ -172,20 +172,18 @@ public class MirrorPong extends PongBase {
 
 			// envoi de la position de la balle
 			sendToDistantPlayer(String.format("%s %d %d", MSG_BALL, ballPoint.x, ballPoint.y));
-			repaint();
+
+            wait(5);
 		}
 
 		// partie terminée
 
 		String winner = (joueur1_score == max_points) ? "P1" : "P2";
-
-		sendToDistantPlayer(String.format("%s %s", MSG_GAME_OVER, winner));
 		onGameOver(winner);
 	}
 
     private void moveWall() {
         Random r = new Random();
-
 
         wall.x = r.nextInt((int) effects_zone.getWidth()) + effects_zone_padding;
         wall.y = r.nextInt((int) effects_zone.getHeight()) + effects_zone_padding;
@@ -354,6 +352,8 @@ public class MirrorPong extends PongBase {
      */
 	@Override
 	protected void onGameOver(String winner) {
+        sendToDistantPlayer(String.format("%s %s", MSG_GAME_OVER, winner));
+        
 		showAlert(winner.equals("P1")
 				  ? "Vous avez gagné \\o/" : "Vous avez perdu [-_-]\"");
 	}
