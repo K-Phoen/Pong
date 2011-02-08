@@ -220,6 +220,10 @@ public class MirrorPong extends PongBase {
 		ballSpeed.x = 4;
 		ballSpeed.y = 2;
 
+        // comme ça la balle n'est pas tout le temps lancée du même côté
+        if(System.currentTimeMillis() % 2 == 0)
+            ballSpeed.x *= -1;
+
 		changeState(State.STARTED); // demarre le jeu
 	}
 
