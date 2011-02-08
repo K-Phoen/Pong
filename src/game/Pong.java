@@ -1,5 +1,6 @@
 package game;
 
+import game.Constants.State;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -110,21 +111,23 @@ public class Pong extends PongBase {
 	public void mouseMoved(MouseEvent e) {
 		joueur2.y = e.getY() - 25;
 
-		sendToDistantPlayer(String.format("%s P2 %s", MSG_MOVE, joueur2.y));
+		sendToDistantPlayer(String.format("%s P2 %s", Constants.MSG_MOVE, joueur2.y));
 	}
 
     @Override
     protected void onGamePause() {
         super.onGamePause();
 
-        sendToDistantPlayer(String.format("%s %s", MSG_STATE_CHANGED, currentState()));
+        sendToDistantPlayer(String.format("%s %s", Constants.MSG_STATE_CHANGED,
+                                                   currentState()));
     }
 
     @Override
     protected void onGameResume() {
         super.onGameResume();
 
-        sendToDistantPlayer(String.format("%s %s", MSG_STATE_CHANGED, currentState()));
+        sendToDistantPlayer(String.format("%s %s", Constants.MSG_STATE_CHANGED,
+                                                   currentState()));
     }
 
 	@Override

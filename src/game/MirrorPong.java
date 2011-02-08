@@ -1,5 +1,6 @@
 package game;
 
+import game.Constants.State;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
@@ -138,7 +139,6 @@ public class MirrorPong extends PongBase {
 	public void run() {
 		Paquet p;
         Random r = new Random();
-
 		while (currentState() != State.FINISHED) {
             repaint();
             
@@ -171,7 +171,9 @@ public class MirrorPong extends PongBase {
             }
 
 			// envoi de la position de la balle
-			sendToDistantPlayer(String.format("%s %d %d", MSG_BALL, ballPoint.x, ballPoint.y));
+			sendToDistantPlayer(String.format("%s %d %d", Constants.MSG_BALL,
+                                                          ballPoint.x,
+                                                          ballPoint.y));
 
             wait(5);
 		}
@@ -202,7 +204,7 @@ public class MirrorPong extends PongBase {
 		joueur1.y = e.getY() - 25;
 
 		// envoi de la position du joueur 1
-		sendToDistantPlayer(String.format("%s P1 %d", MSG_MOVE, joueur1.y));
+		sendToDistantPlayer(String.format("%s P1 %d", Constants.MSG_MOVE, joueur1.y));
 	}
 
 	/**
@@ -250,8 +252,8 @@ public class MirrorPong extends PongBase {
 		ballSpeed.y += racketHit / 7;
 		ballSpeed.x = -ballSpeed.x;
 
-		sendToDistantPlayer(MSG_CONTACT);
-		Sound.play(SOUND_CONTACT);
+		sendToDistantPlayer(Constants.MSG_CONTACT);
+		Sound.play(Constants.SOUND_CONTACT);
 	}
 
     private void checkWallCollision(Wall wall) {
@@ -267,8 +269,8 @@ public class MirrorPong extends PongBase {
 		ballSpeed.y += racketHit / 7;
 		ballSpeed.x = -ballSpeed.x;
 
-		sendToDistantPlayer(MSG_CONTACT);
-		Sound.play(SOUND_CONTACT);
+		sendToDistantPlayer(Constants.MSG_CONTACT);
+		Sound.play(Constants.SOUND_CONTACT);
 	}
 
 	/**
@@ -321,11 +323,11 @@ public class MirrorPong extends PongBase {
 			joueur2_score++;
 
 		// envoi des scores
-		sendToDistantPlayer(MSG_SCORE + " P1 " + joueur1_score);
-		sendToDistantPlayer(MSG_SCORE + " P2 " + joueur2_score);
+		sendToDistantPlayer(Constants.MSG_SCORE + " P1 " + joueur1_score);
+		sendToDistantPlayer(Constants.MSG_SCORE + " P2 " + joueur2_score);
 
 		// envoi de l'info "mur touché"
-		sendToDistantPlayer(MSG_WALL_TOUCHED);
+		sendToDistantPlayer(Constants.MSG_WALL_TOUCHED);
 
 		super.onWallTouched();
 
@@ -346,7 +348,7 @@ public class MirrorPong extends PongBase {
     protected void changeState(State new_sate) {
         super.changeState(new_sate);
 
-        sendToDistantPlayer(String.format("%s %s", MSG_STATE_CHANGED, new_sate));
+        sendToDistantPlayer(String.format("%s %s", Constants.MSG_STATE_CHANGED, new_sate));
     }
 
     /**
@@ -356,7 +358,7 @@ public class MirrorPong extends PongBase {
      */
 	@Override
 	protected void onGameOver(String winner) {
-        sendToDistantPlayer(String.format("%s %s", MSG_GAME_OVER, winner));
+        sendToDistantPlayer(String.format("%s %s", Constants.MSG_GAME_OVER, winner));
         
 		showAlert(winner.equals("P1")
 				  ? "Vous avez gagné \\o/" : "Vous avez perdu [-_-]\"");

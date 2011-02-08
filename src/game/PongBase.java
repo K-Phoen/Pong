@@ -1,5 +1,6 @@
 package game;
 
+import game.Constants.State;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -25,13 +26,6 @@ import network.NetworkConnection;
 
 
 public abstract class PongBase extends JFrame implements KeyListener, Runnable, MouseListener, MouseMotionListener {
-
-    /**
-     * Représente un état du jeu
-     */
-    protected enum State {
-		WAITING, READY, STARTED, PAUSED, FINISHED
-	}
 
 	/**
 	 * ID de sérialisation
@@ -87,28 +81,6 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 */
 	protected int joueur1_score = 0, joueur2_score = 0;
 
-	/**
-	 * Liste des instructions reconnues par notre "protocole"
-	 */
-	protected static final String MSG_MOVE 			= "move";
-	protected static final String MSG_POS 			= "positions";
-	protected static final String MSG_BALL 			= "ball";
-	protected static final String MSG_SCORE 		= "score";
-	protected static final String MSG_CONTACT		= "contact";
-	protected static final String MSG_WALL_TOUCHED 	= "wall";
-	protected static final String MSG_GAME_OVER 	= "game_over";
-	protected static final String MSG_GAME_STARTED 	= "game_started";
-    protected static final String MSG_STATE_CHANGED	= "state";
-
-	/**
-	 * Localisation des ressources sur le disque dur
-	 */
-	protected static final String SOUND_CONTACT = "./data/pong.wav";
-    protected static final String SOUND_START   = "./data/baseball.wav";
-	protected static final String IMG_BALL 		= "./data/ball.png";
-	protected static final String IMG_RACKET_P1	= "./data/raquette.png";
-	protected static final String IMG_RACKET_P2	= "./data/raquette2.png";
-
 
 	/**
 	 * Lance le jeu
@@ -152,9 +124,9 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 		// chargement de l'image de la balle et des raquettes
 		try {
-			img_ball = ImageIO.read(new File(IMG_BALL));
-			img_raquette = ImageIO.read(new File(IMG_RACKET_P1));
-			img_raquette2 = ImageIO.read(new File(IMG_RACKET_P2));
+			img_ball = ImageIO.read(new File(Constants.IMG_BALL));
+			img_raquette = ImageIO.read(new File(Constants.IMG_RACKET_P1));
+			img_raquette2 = ImageIO.read(new File(Constants.IMG_RACKET_P2));
 		} catch (IOException e) {
 			showAlert("Impossible de charger une ressource : "+e.getMessage());
 			System.exit(1);
@@ -163,7 +135,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		resetBall();
 
 		// zone de jeu
-		plane = new Rectangle(15, 15, (getWidth()), (getHeight() - 30));
+		plane = new Rectangle(15, 15, getWidth(), getHeight() - 30);
 
 		// actualisation de l'affichage
 		repaint();
@@ -179,10 +151,10 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
     private void loadSounds()
     {
         try {
-            Sound.load(SOUND_CONTACT);
-            Sound.load(SOUND_START);
+            Sound.load(Constants.SOUND_CONTACT);
+            Sound.load(Constants.SOUND_START);
         } catch (Exception ex) {
-            showAlert("Impossible de charger les sons : "+ex.getLocalizedMessage());
+            showAlert("Impossible de charger les sons : "+ex.getMessage());
         }
     }
 
@@ -282,11 +254,9 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
     protected void changeState(State new_state) {
         state = new_state;
 
-        System.out.println(state);
-
         // lancement du jeu
         if(new_state == State.STARTED && joueur1_score == 0 && joueur2_score == 0)
-            Sound.play(SOUND_START);
+            Sound.play(Constants.SOUND_START);
     }
 
     /**
@@ -349,11 +319,11 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 		/* commandes à un seul argument */
 
-		if(args[0].equals(MSG_WALL_TOUCHED)) {
+		if(args[0].equals(Constants.MSG_WALL_TOUCHED)) {
 			onWallTouched();
 			return;
-		} else if (args[0].equals(MSG_CONTACT)) {
-			Sound.play(SOUND_CONTACT);
+		} else if (args[0].equals(Constants.MSG_CONTACT)) {
+			Sound.play(Constants.SOUND_CONTACT);
 			return;
 		}
 
@@ -361,11 +331,12 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		/* commandes à deux arguments */
 
 		if(args.length == 2) {
-			if (args[0].equals(MSG_GAME_OVER)) {
+			if (args[0].equals(Constants.MSG_GAME_OVER)) {
 				onGameOver(args[1]);
 				return;
-            } else if (args[0].equals(MSG_STATE_CHANGED)) {
+            } else if (args[0].equals(Constants.MSG_STATE_CHANGED)) {
                 changeState(State.valueOf(args[1]));
+                return;
 			}
 		}
 
@@ -374,17 +345,17 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 		/* commandes à trois arguments */
 
-		if(args[0].equals(MSG_MOVE)) { // changement de la position des joueurs
+		if(args[0].equals(Constants.MSG_MOVE)) { // changement de la position des joueurs
 			if(args[1].equals("P1"))
 				joueur1.y = Integer.parseInt(args[2]); // changement de la position du joueur 1
 			else
 				joueur2.y = Integer.parseInt(args[2]); // changement de la position du joueur 2
 		}
-		else if(args[0].equals(MSG_BALL)) { // changement de la position de la balle
+		else if(args[0].equals(Constants.MSG_BALL)) { // changement de la position de la balle
 			ballPoint.x = Integer.parseInt(args[1]);
 			ballPoint.y = Integer.parseInt(args[2]);
 		}
-		else if(args[0].equals(MSG_SCORE)) { // mise à jour des scores
+		else if(args[0].equals(Constants.MSG_SCORE)) { // mise à jour des scores
 			if(args[1].equals("P1"))
 				joueur1_score = Integer.parseInt(args[2]);
 			else
@@ -454,24 +425,21 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 * @return true si un message a été affiché, false sinon
 	 */
 	private boolean drawStateMessage() {
+        offscreeng.setFont(new Font("Dialog", Font.BOLD, 40));
+        
 		switch (state) {
 			case WAITING:
-				offscreeng.setFont(new Font("Dialog", Font.BOLD, 40));
 				offscreeng.drawString("En attente ...",
 									  getWidth() / 2 - 90, getHeight() / 2);
 				break;
 			case READY:
-				offscreeng.setFont(new Font("Dialog", Font.BOLD, 40));
 				offscreeng.drawString("Prêt ?",
 									  getWidth() / 2 - 40, getHeight() / 2);
 				break;
 			case PAUSED:
-                System.out.println("Paused");
-				offscreeng.setFont(new Font("Dialog", Font.BOLD, 40));
-				offscreeng.drawString("Pause", getWidth() / 2 - 50, getHeight() / 2 );
+                offscreeng.drawString("Pause", getWidth() / 2 - 50, getHeight() / 2 );
 				break;
 			case FINISHED:
-				offscreeng.setFont(new Font("Dialog", Font.BOLD, 40));
 				offscreeng.drawString("Game Over !", getWidth() / 2 - 110,
 									  getHeight() / 2);
 				break;
