@@ -6,7 +6,6 @@ public interface Constants {
 	 * Liste des instructions reconnues par notre "protocole"
 	 */
 	static final String MSG_MOVE 			= "move";
-	static final String MSG_POS 			= "positions";
 	static final String MSG_BALL 			= "ball";
 	static final String MSG_SCORE           = "score";
 	static final String MSG_CONTACT         = "contact";
