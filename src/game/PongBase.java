@@ -18,7 +18,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import javax.imageio.ImageIO;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -76,8 +75,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 	final protected int racket_width = 13, racket_height = 75;
 	final protected int ball_width = 32, ball_height = 32;
-
-    final protected int effects_zone_padding = 100;
+    final protected int effects_zone_padding = 150;
 
 	/**
 	 * Utilisée pour faire clignoter le jeu
@@ -290,13 +288,13 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
     /**
      * Change l'état actuel du jeu
      *
-     * @param new_sate Nouvel état
+     * @param new_state Nouvel état
      */
-    protected void changeState(State new_sate) {
-        state = new_sate;
+    protected void changeState(State new_state) {
+        state = new_state;
 
         // lancement du jeu
-        if(new_sate == State.STARTED && joueur1_score == 0 && joueur2_score == 0)
+        if(new_state == State.STARTED && joueur1_score == 0 && joueur2_score == 0)
             Sound.play(SOUND_START);
     }
 
@@ -402,7 +400,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 			ballPoint.x = Integer.parseInt(args[1]);
 			ballPoint.y = Integer.parseInt(args[2]);
 		}
-		else if(args[0].equals(MSG_SCORE)) { // mise � jour des scores
+		else if(args[0].equals(MSG_SCORE)) { // mise à jour des scores
 			if(args[1].equals("P1"))
 				joueur1_score = Integer.parseInt(args[2]);
 			else
