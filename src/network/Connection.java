@@ -1,3 +1,25 @@
+/*
+ *  NetworkConnection.java
+ *
+ *  Copyright 2011 Kévin Gomez Pinto <contact@kevingomez.fr>
+ *                 Jonathan Da Silva <Jonathan.Da_Silva1@etudiant.u-clermont1.fr>
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ *  MA 02110-1301, USA.
+ */
+
 package network;
 
 import java.io.IOException;
@@ -8,7 +30,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
 
-public class NetworkConnection {
+public class Connection {
 	private DatagramSocket sock;
 
 	private int to_confirm = 0;
@@ -19,7 +41,7 @@ public class NetworkConnection {
 	 *
 	 * @throws SocketException En cas d'erreur
 	 */
-	public NetworkConnection() throws SocketException {
+	public Connection() throws SocketException {
 		sock = new DatagramSocket();
 	}
 
@@ -30,7 +52,7 @@ public class NetworkConnection {
 	 *
 	 * @throws SocketException En cas d'erreur
 	 */
-	public NetworkConnection(int port) throws SocketException {
+	public Connection(int port) throws SocketException {
 		sock = new DatagramSocket(port);
 	}
 

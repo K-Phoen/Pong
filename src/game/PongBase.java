@@ -1,3 +1,25 @@
+/*
+ *  PongBase.java
+ *
+ *  Copyright 2011 Kévin Gomez Pinto <contact@kevingomez.fr>
+ *                 Jonathan Da Silva <Jonathan.Da_Silva1@etudiant.u-clermont1.fr>
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ *  MA 02110-1301, USA.
+ */
+
 package game;
 
 import game.Constants.State;
@@ -22,7 +44,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import network.NetworkConnection;
+import network.Connection;
 
 
 public abstract class PongBase extends JFrame implements KeyListener, Runnable, MouseListener, MouseMotionListener {
@@ -40,7 +62,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	/**
 	 * Connexion au second joueur ou socket serveur
 	 */
-	protected NetworkConnection sock;
+	protected Connection sock;
 
 	/**
 	 * Adresse de l'hôte distant
