@@ -260,9 +260,9 @@ public class MirrorPong extends PongBase {
 	}
 
     private void checkWallCollision(Wall wall) {
-        Rectangle balle_zone = new Rectangle(ballPoint.x - ball_width / 2,
-											 ballPoint.y - ball_height / 2,
-											 ball_width, ball_height);
+        Rectangle balle_zone = new Rectangle(ballPoint.x - Constants.BALL_HEIGHT / 2,
+											 ballPoint.y - Constants.BALL_WIDTH / 2,
+											 Constants.BALL_WIDTH, Constants.BALL_HEIGHT);
 
         if(!wall.isVisible() || !wall.intersects(balle_zone))
             return;
@@ -285,10 +285,11 @@ public class MirrorPong extends PongBase {
 	 */
 	private boolean checkCollision(Point joueur) {
 		Rectangle joueur_zone = new Rectangle(joueur.x, joueur.y,
-											  racket_width, racket_height);
-		Rectangle balle_zone = new Rectangle(ballPoint.x - ball_width / 2,
-											 ballPoint.y - ball_height / 2,
-											 ball_width, ball_height);
+											  Constants.RACKET_WIDTH,
+                                              Constants.RACKET_HEIGHT);
+		Rectangle balle_zone = new Rectangle(ballPoint.x - Constants.BALL_WIDTH / 2,
+											 ballPoint.y - Constants.BALL_HEIGHT / 2,
+											 Constants.BALL_WIDTH, Constants.BALL_HEIGHT);
 
 		return joueur_zone.intersects(balle_zone);
 	}
@@ -297,9 +298,9 @@ public class MirrorPong extends PongBase {
 	 * Vérifie que la balle ne soit pas en collision avec un mur.
 	 */
 	protected void checkWalls() {
-		int ball_left = ballPoint.x - ball_width / 2;
-		int ball_top = ballPoint.y - ball_height / 2;
-		int ball_right = ballPoint.x + ball_width;
+		int ball_left = ballPoint.x - Constants.BALL_WIDTH / 2;
+		int ball_top = ballPoint.y - Constants.BALL_WIDTH / 2;
+		int ball_right = ballPoint.x + Constants.BALL_WIDTH;
 		int ball_bottom = ballPoint.y;
 
 		// gauche ou droit

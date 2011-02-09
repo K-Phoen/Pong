@@ -24,6 +24,9 @@ public interface Constants {
 	static final String IMG_RACKET_P1	= "./data/raquette.png";
 	static final String IMG_RACKET_P2	= "./data/raquette2.png";
 
+    static final int RACKET_WIDTH = 13, RACKET_HEIGHT = 75;
+	static final int BALL_WIDTH = 32, BALL_HEIGHT = 32;
+
     /**
      * Représente un état du jeu
      */

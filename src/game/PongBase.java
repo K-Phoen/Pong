@@ -67,8 +67,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
     
 	protected Point ballPoint, joueur1, joueur2, ballSpeed;
 
-	final protected int racket_width = 13, racket_height = 75;
-	final protected int ball_width = 32, ball_height = 32;
+	
     final protected int effects_zone_padding = 150;
 
 	/**
@@ -415,8 +414,8 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
                     wall.drawOn(offscreeng);
 
 				// affichage de la balle
-				offscreeng.drawImage(img_ball, ballPoint.x - ball_width / 2,
-									 ballPoint.y - ball_height / 2, null);
+				offscreeng.drawImage(img_ball, ballPoint.x - Constants.BALL_WIDTH / 2,
+									 ballPoint.y - Constants.BALL_HEIGHT / 2, null);
 			}
 		}
 
