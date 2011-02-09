@@ -11,6 +11,7 @@ public interface Constants {
 	static final String MSG_CONTACT         = "contact";
 	static final String MSG_WALL_TOUCHED 	= "wall";
     static final String MSG_STATE_CHANGED	= "state";
+    static final String MSG_WALL_POS       	= "wall_pos";
 
 	/**
 	 * Localisation des ressources sur le disque dur

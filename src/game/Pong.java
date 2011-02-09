@@ -134,6 +134,13 @@ public class Pong extends PongBase {
                                                    currentState()));
     }
 
+    @Override
+    protected void onWallMoved(int x, int y, boolean visible) {
+        wall.x = x;
+        wall.y = y;
+        wall.setVisible(visible);
+    }
+
 	protected void onGameOver() {
         String winner = (joueur1_score > joueur2_score) ? "P1" : "P2";
 

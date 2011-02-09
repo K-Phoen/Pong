@@ -123,7 +123,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
         // création du mur
         try {
-            wall = new Wall(20, 75);
+            wall = new Wall(20, 75, Constants.IMG_WALL);
         } catch (IOException e) {
 			showAlert("Impossible de charger le mur : "+e.getMessage());
 			System.exit(1);
@@ -253,6 +253,8 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		repaint();
 	}
 
+    protected void onWallMoved(int x, int y, boolean visible) {}
+
     /**
      * Change l'état actuel du jeu
      *
@@ -337,27 +339,36 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 			}
 		}
 
-		if(args.length != 3)
-			return;
+        /* commandes à trois arguments */
+		if(args.length == 3) {
+            if(args[0].equals(Constants.MSG_MOVE)) { // changement de la position des joueurs
+                if(args[1].equals("P1"))
+                    joueur1.y = Integer.parseInt(args[2]); // changement de la position du joueur 1
+                else
+                    joueur2.y = Integer.parseInt(args[2]); // changement de la position du joueur 2
+            }
+            else if(args[0].equals(Constants.MSG_BALL)) { // changement de la position de la balle
+                ballPoint.x = Integer.parseInt(args[1]);
+                ballPoint.y = Integer.parseInt(args[2]);
+            }
+            else if(args[0].equals(Constants.MSG_SCORE)) { // mise à jour des scores
+                if(args[1].equals("P1"))
+                    joueur1_score = Integer.parseInt(args[2]);
+                else
+                    joueur2_score = Integer.parseInt(args[2]);
+            }
+        }
 
-		/* commandes à trois arguments */
+        /* Commandes à 4 arguments */
+        if(args.length == 4) {
+            if(args[0].equals(Constants.MSG_WALL_POS)) {
+                int x = Integer.parseInt(args[1]);
+                int y = Integer.parseInt(args[2]);
+                boolean visible = args[3].equals("on");
 
-		if(args[0].equals(Constants.MSG_MOVE)) { // changement de la position des joueurs
-			if(args[1].equals("P1"))
-				joueur1.y = Integer.parseInt(args[2]); // changement de la position du joueur 1
-			else
-				joueur2.y = Integer.parseInt(args[2]); // changement de la position du joueur 2
-		}
-		else if(args[0].equals(Constants.MSG_BALL)) { // changement de la position de la balle
-			ballPoint.x = Integer.parseInt(args[1]);
-			ballPoint.y = Integer.parseInt(args[2]);
-		}
-		else if(args[0].equals(Constants.MSG_SCORE)) { // mise à jour des scores
-			if(args[1].equals("P1"))
-				joueur1_score = Integer.parseInt(args[2]);
-			else
-				joueur2_score = Integer.parseInt(args[2]);
-		}
+                onWallMoved(x, y, visible);
+            }
+        }
 	}
 
 	/**

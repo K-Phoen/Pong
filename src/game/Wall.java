@@ -19,10 +19,10 @@ public class Wall extends Rectangle {
     private BufferedImage img;
 
 
-    public Wall(int w, int h) throws IOException {
+    public Wall(int w, int h, String img) throws IOException {
         setSize(w, h);
 
-        img = ImageIO.read(new File(Constants.IMG_WALL));
+        this.img = ImageIO.read(new File(img));
     }
 
     public void setVisible(boolean visible) {

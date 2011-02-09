@@ -166,7 +166,12 @@ public class MirrorPong extends PongBase {
             {
                 moveWall();
                 wall.toggleVisibility();
+
+                // envoi des infos du mur
+                sendToDistantPlayer(String.format("%s %d %d %s", Constants.MSG_WALL_POS,
+                                                  wall.x, wall.y, wall.isVisible() ? "on" : "off"));
             }
+
 
 			// envoi de la position de la balle
 			sendToDistantPlayer(String.format("%s %d %d", Constants.MSG_BALL,
@@ -248,7 +253,7 @@ public class MirrorPong extends PongBase {
 		int racketHit = ballPoint.y - (player.y + 25);
 
 		ballSpeed.y += racketHit / 7;
-		ballSpeed.x = -ballSpeed.x;
+		ballSpeed.x *= -1;
 
 		sendToDistantPlayer(Constants.MSG_CONTACT);
 		Sound.play(Constants.SOUND_CONTACT);
