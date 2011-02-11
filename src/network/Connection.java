@@ -33,7 +33,10 @@ import java.net.SocketTimeoutException;
 public class Connection {
 	private DatagramSocket sock;
 
-	private int to_confirm = 0;
+	private int toConfirm = 0;
+
+    private static final int BUFFER_SIZE    = 1024;
+    private static final int NB_TRIES       = 3;
 
 
 	/**
@@ -90,9 +93,9 @@ public class Connection {
 				confirm(paquet.getDatagram(), Integer.parseInt(data[0]));
 
 				// reconstruction d'un paquet sans le numéro du paquet
-				String new_msg = paquet.getMessage().substring(data[0].length() + 1);
+				String newMsg = paquet.getMessage().substring(data[0].length() + 1);
 
-				paquet.setMessage(new_msg);
+				paquet.setMessage(newMsg);
 				//return new Paquet(datagram);
 			} catch (NumberFormatException e) {
 				// si pas un nombre : pas une demande de confirmation
@@ -109,7 +112,7 @@ public class Connection {
 			throw new IOException("Impossible de définir le timeout pour la réception");
 		}
 
-		byte[] buffer = new byte[1024];
+		byte[] buffer = new byte[BUFFER_SIZE];
 		DatagramPacket p = new DatagramPacket(buffer, buffer.length);
 
 		try {
@@ -117,7 +120,7 @@ public class Connection {
 
 			return new Paquet(p);
 		} catch (SocketTimeoutException e) {
-			// on ignore : null sera retourn�
+			// on ignore : null sera retourné
 		}
 
 		return null;
@@ -128,13 +131,12 @@ public class Connection {
 	}
 
 	public void sendAndWaitConfirm(InetAddress addr, int port, String msg, int timeout) throws IOException {
-		to_confirm++;
+		toConfirm++;
 
 		Paquet reply;
-		for(int nb_essais = 3; nb_essais != 0; nb_essais--)
-		{
+		for(int nb_essais = NB_TRIES; nb_essais != 0; nb_essais--) {
 			try {
-				send(addr, port, String.format("%d %s", to_confirm, msg));
+				send(addr, port, String.format("%d %s", toConfirm, msg));
 			} catch (IOException e) {
 				continue; // on retente
 			}
@@ -145,7 +147,7 @@ public class Connection {
 				continue;
 			}
 
-			if(reply != null && reply.getMessage().equals(String.format("%d OK", to_confirm)))
+			if(reply != null && reply.getMessage().equals(String.format("%d OK", toConfirm)))
 				return;
 		}
 
@@ -169,24 +171,23 @@ public class Connection {
 	 * Envoie la confirmation pour accuser réception d'un message
 	 *
 	 * @param p DatagramPacket dont on confirme la réception
-	 * @param msg_no Identifiant du message contenu dans le paquet
+	 * @param msgNo Identifiant du message contenu dans le paquet
 	 *
 	 * @throws IOException Si l'envoi échoue
 	 */
-	private void confirm(DatagramPacket p, int msg_no) throws IOException {
-		String msg = String.format("%d OK", msg_no);
+	private void confirm(DatagramPacket p, int msgNo) throws IOException {
+		String msg = String.format("%d OK", msgNo);
 
 		sock.send(new DatagramPacket(msg.getBytes(), msg.length(), p.getAddress(), p.getPort()));
 	}
 
 	/**
-	 * On ferme proprement la socket dès que l'objet est d�truit
+	 * On ferme proprement la socket dès que l'objet est détruit
      *
-     * @throws Throwable Bouh
+     * @throws Throwable Bouh.
      */
 	@Override
-	public void finalize() throws Throwable
-    {
+	public void finalize() throws Throwable {
          sock.close();
          super.finalize();
     }

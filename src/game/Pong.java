@@ -31,7 +31,7 @@ import network.Connection;
 import network.Paquet;
 
 
-public class Pong extends PongBase {
+public final class Pong extends PongBase {
 	private static final long serialVersionUID = 7657998555042629676L;
 
 
@@ -74,7 +74,7 @@ public class Pong extends PongBase {
      * @throws IllegalStateException Si la connexion au serveur est impossible
      */
 	@Override
-	public void start() throws IllegalStateException {
+	public void start() {
 		// connexion au serveur
 		try{
 			sock = new Connection();
@@ -164,7 +164,7 @@ public class Pong extends PongBase {
     }
 
 	protected void onGameOver() {
-        String winner = (joueur1_score > joueur2_score) ? "P1" : "P2";
+        String winner = (joueur1Score > joueur2Score) ? "P1" : "P2";
 
 		showAlert(winner.equals("P2")
 				  ? "Vous avez gagné \\o/" : "Vous avez perdu [-_-]\"");

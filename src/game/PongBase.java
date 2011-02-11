@@ -67,12 +67,12 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	/**
 	 * Adresse de l'hôte distant
 	 */
-	private InetAddress distant_player_host;
+	private InetAddress distantPlayerHost;
 
 	/**
 	 * Port de l'hôte distant
 	 */
-	private int distant_player_port = 6000;
+	private int distantPlayerPort = 6000;
 
 	/**
 	 * Etat actuel du jeu (lancé, en pause, etc.)
@@ -80,27 +80,24 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	private State state = State.WAITING;
 
     protected Wall wall;
-    protected Rectangle effects_zone;
+    protected Rectangle effectsZone;
 
 	private Image offscreeni;
 	private Graphics offscreeng;
 	protected Rectangle plane;
-    private BufferedImage img_ball, img_raquette, img_raquette2;
+    private BufferedImage imgBall, imgRaquette, imgRaquette2;
     
 	protected Point ballPoint, joueur1, joueur2, ballSpeed;
-
-	
-    final protected int effects_zone_padding = 150;
 
 	/**
 	 * Utilisée pour faire clignoter le jeu
 	 */
-	private boolean death_mode = false;
+	private boolean deathMode = false;
 
 	/**
 	 * Scores des deux joueurs
 	 */
-	protected int joueur1_score = 0, joueur2_score = 0;
+	protected int joueur1Score = 0, joueur2Score = 0;
 
 
 	/**
@@ -114,11 +111,11 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	/**
 	 * Initialise la partie graphique.
      *
-     * @param window_title Titre de la fenêtre
+     * @param windowTitle Titre de la fenêtre
 	 */
-	protected void initGUI(String window_title) {
+	protected final void initGUI(String windowTitle) {
 		// caractéristiques de la fenêtre
-		setTitle(window_title);
+		setTitle(windowTitle);
 		setVisible(true);
 		setBounds(100, 100, 640, 480);
 		//setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -134,9 +131,10 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		offscreeng = offscreeni.getGraphics();
 		setBackground(Color.black);
 
-        effects_zone = new Rectangle(effects_zone_padding, effects_zone_padding,
-                                     getWidth() - 2 * effects_zone_padding,
-                                     getHeight() - 2 * effects_zone_padding);
+        effectsZone = new Rectangle(Constants.EFFECTS_ZONE_MARGIN,
+                                    Constants.EFFECTS_ZONE_MARGIN,
+                                    getWidth() - 2 * Constants.EFFECTS_ZONE_MARGIN,
+                                    getHeight() - 2 * Constants.EFFECTS_ZONE_MARGIN);
 
 		// on place les centres des raquettes
 		joueur2 = new Point(getWidth() - 45, getHeight() / 2 - 25);
@@ -152,9 +150,9 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 		// chargement de l'image de la balle et des raquettes
 		try {
-			img_ball = ImageIO.read(new File(Constants.IMG_BALL));
-			img_raquette = ImageIO.read(new File(Constants.IMG_RACKET_P1));
-			img_raquette2 = ImageIO.read(new File(Constants.IMG_RACKET_P2));
+			imgBall = ImageIO.read(new File(Constants.IMG_BALL));
+			imgRaquette = ImageIO.read(new File(Constants.IMG_RACKET_P1));
+			imgRaquette2 = ImageIO.read(new File(Constants.IMG_RACKET_P2));
 		} catch (IOException e) {
 			showAlert("Impossible de charger une ressource : "+e.getMessage());
 			System.exit(1);
@@ -176,8 +174,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
      * Pré-charge les sons de manières à ce qu'ils puissent être joués
      * immédiatement lors de l'appel à Sound.play()
      */
-    private void loadSounds()
-    {
+    private void loadSounds() {
         try {
             Sound.load(Constants.SOUND_CONTACT);
             Sound.load(Constants.SOUND_START);
@@ -187,29 +184,29 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
     }
 
 	public void setDistantHost(String host) throws UnknownHostException {
-		distant_player_host = InetAddress.getByName(host);
+		distantPlayerHost = InetAddress.getByName(host);
 	}
 
 	public void setDistantHost(InetAddress host) {
-		distant_player_host = host;
+		distantPlayerHost = host;
 	}
 
 	public void setDistantPort(int port) {
-		distant_player_port = port;
+		distantPlayerPort = port;
 	}
 
 	public InetAddress getDistantHost() {
-		return distant_player_host;
+		return distantPlayerHost;
 	}
 
 	public int getDistantPort() {
-		return distant_player_port;
+		return distantPlayerPort;
 	}
 
 	/**
 	 * Position la balle au centre du terrain, avec une vitesse nulle.
 	 */
-	protected void resetBall() {
+	protected final void resetBall() {
 		ballPoint = new Point(getWidth() / 2, getHeight() / 2);
 		ballSpeed = new Point(0, 0);
 	}
@@ -219,7 +216,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 * Ce thread sera chargé de mettre à jour l'affichage en fonction
 	 * des échanges entre le client et le serveur.
 	 */
-	protected void startGame() {
+	private void startGame() {
 		if (runner != null)
 			return;
 
@@ -238,12 +235,12 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 *
 	 * @param msg Le message à envoyer
 	 */
-	protected void sendToDistantPlayer(String msg) {
-		if(distant_player_host == null)
+	protected final void sendToDistantPlayer(String msg) {
+		if(distantPlayerHost == null)
 			return;
 
 		try {
-			sock.send(distant_player_host, distant_player_port, msg);
+			sock.send(distantPlayerHost, distantPlayerPort, msg);
 		} catch (IOException e) {
 			showAlert("Erreur à l'envoi de données vers le client : "+ e);
 		}
@@ -279,14 +276,15 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
     /**
      * Change l'état actuel du jeu
      *
-     * @param new_state Nouvel état
+     * @param newState Nouvel état
      */
-    protected void changeState(State new_state) {
-        state = new_state;
+    protected void changeState(State newState) {
+        state = newState;
 
         // lancement du jeu
-        if(new_state == State.STARTED && joueur1_score == 0 && joueur2_score == 0)
+        if(newState == State.STARTED && joueur1Score == 0 && joueur2Score == 0) {
             Sound.play(Constants.SOUND_START);
+        }
     }
 
     /**
@@ -294,7 +292,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
      *
      * @return L'état courant du jeu
      */
-    protected State currentState() {
+    protected final State currentState() {
         return state;
     }
 
@@ -307,12 +305,14 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	public void keyPressed(KeyEvent e) {
 		char c = e.getKeyChar();
 
-		if(c == 'p' || c == 'P') {
-			if(state == State.PAUSED)
-				onGameResume();
-			else
-				onGamePause();
-		}
+		if(c != 'p' && c != 'P') {
+            return;
+        }
+
+        if(state == State.PAUSED)
+            onGameResume();
+        else
+            onGamePause();
 	}
 
 	@Override
@@ -323,7 +323,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 *
 	 * @param delay Nombre de millisecondes à attendre
 	 */
-	protected void wait(int delay) {
+	protected final void wait(int delay) {
 		try {
 			Thread.sleep(delay);
 		} catch (InterruptedException e) {
@@ -337,60 +337,67 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 *
 	 * @param cmd Message à analyser
 	 */
-	protected void executeCmd(String cmd) {
+	protected final void executeCmd(String cmd) {
 		String[] args = cmd.split(" ");
+        String cmdName = args[0];
 
-		/* commandes à un seul argument */
-
-		if(args[0].equals(Constants.MSG_WALL_TOUCHED)) {
-			onWallTouched();
-			return;
-		} else if (args[0].equals(Constants.MSG_CONTACT)) {
-			Sound.play(Constants.SOUND_CONTACT);
-			return;
-		}
-
-
-		/* commandes à deux arguments */
-
-		if(args.length == 2) {
-			if (args[0].equals(Constants.MSG_STATE_CHANGED)) {
-                changeState(State.valueOf(args[1]));
-                return;
-			}
-		}
-
-        /* commandes à trois arguments */
-		if(args.length == 3) {
-            if(args[0].equals(Constants.MSG_MOVE)) { // changement de la position des joueurs
-                if(args[1].equals("P1"))
-                    joueur1.y = Integer.parseInt(args[2]); // changement de la position du joueur 1
-                else
-                    joueur2.y = Integer.parseInt(args[2]); // changement de la position du joueur 2
-            }
-            else if(args[0].equals(Constants.MSG_BALL)) { // changement de la position de la balle
-                ballPoint.x = Integer.parseInt(args[1]);
-                ballPoint.y = Integer.parseInt(args[2]);
-            }
-            else if(args[0].equals(Constants.MSG_SCORE)) { // mise à jour des scores
-                if(args[1].equals("P1"))
-                    joueur1_score = Integer.parseInt(args[2]);
-                else
-                    joueur2_score = Integer.parseInt(args[2]);
-            }
-        }
-
-        /* Commandes à 4 arguments */
-        if(args.length == 4) {
-            if(args[0].equals(Constants.MSG_WALL_POS)) {
-                int x = Integer.parseInt(args[1]);
-                int y = Integer.parseInt(args[2]);
-                boolean visible = args[3].equals("on");
-
-                onWallMoved(x, y, visible);
-            }
+		switch(args.length) {
+            case 1:
+                executeOneArgCmd(cmdName);
+                break;
+            case 2:
+                executeTwoArgsCmd(cmdName, args);
+                break;
+            case 3:
+                executeThreeArgsCmd(cmd, args);
+                break;
+            case 4:
+                executeFourArgsCmd(cmd, args);
+                break;
         }
 	}
+
+    private void executeOneArgCmd(String cmd) {
+        if(cmd.equals(Constants.MSG_WALL_TOUCHED)) {
+			onWallTouched();
+		} else if (cmd.equals(Constants.MSG_CONTACT)) {
+			Sound.play(Constants.SOUND_CONTACT);
+		}
+    }
+
+    private void executeTwoArgsCmd(String cmd, String[] args) {
+        if (cmd.equals(Constants.MSG_STATE_CHANGED))
+            changeState(State.valueOf(args[1]));
+    }
+
+    private void executeThreeArgsCmd(String cmd, String[] args) {
+        if(cmd.equals(Constants.MSG_MOVE)) { // changement de la position des joueurs
+            if(args[1].equals("P1"))
+                joueur1.y = Integer.parseInt(args[2]); // changement de la position du joueur 1
+            else
+                joueur2.y = Integer.parseInt(args[2]); // changement de la position du joueur 2
+        } else if(cmd.equals(Constants.MSG_BALL)) { // changement de la position de la balle
+            ballPoint.x = Integer.parseInt(args[1]);
+            ballPoint.y = Integer.parseInt(args[2]);
+        } else if(cmd.equals(Constants.MSG_SCORE)) { // mise à jour des scores
+            int score = Integer.parseInt(args[2]);
+
+            if(args[1].equals("P1"))
+                joueur1Score = score;
+            else
+                joueur2Score = score;
+        }
+    }
+
+    private void executeFourArgsCmd(String cmd, String[] args) {
+        if(!cmd.equals(Constants.MSG_WALL_POS))
+            return;
+
+        int x = Integer.parseInt(args[1]);
+        int y = Integer.parseInt(args[2]);
+
+        onWallMoved(x, y, args[3].equals("on"));
+    }
 
 	/**
 	 * Demande de re-dessiner l'interface
@@ -414,7 +421,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 		offscreeng.setColor(new Color(244, 122, 0)); // orange foncé
 		offscreeng.fillRect(0, 0, getWidth(), getHeight());
-		offscreeng.setColor(!death_mode ? Color.white : Color.red);
+		offscreeng.setColor(!deathMode ? Color.white : Color.red);
 
 		displayScores();
 
@@ -424,8 +431,8 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 			offscreeng.drawRect(plane.x, plane.y, plane.width - 30, plane.height);
 
 			// affichage des raquettes
-			offscreeng.drawImage(img_raquette2, joueur2.x, joueur2.y, null);
-			offscreeng.drawImage(img_raquette, joueur1.x, joueur1.y, null);
+			offscreeng.drawImage(imgRaquette2, joueur2.x, joueur2.y, null);
+			offscreeng.drawImage(imgRaquette, joueur1.x, joueur1.y, null);
 
 			// affichage d'un message si besoin
 			if(!drawStateMessage()) {
@@ -436,7 +443,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
                     wall.drawOn(offscreeng);
 
 				// affichage de la balle
-				offscreeng.drawImage(img_ball, ballPoint.x - Constants.BALL_WIDTH / 2,
+				offscreeng.drawImage(imgBall, ballPoint.x - Constants.BALL_WIDTH / 2,
 									 ballPoint.y - Constants.BALL_HEIGHT / 2, null);
 			}
 		}
@@ -480,12 +487,12 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 * Dessine les lignes du terrain
 	 */
 	private void drawGroundLines() {
-		int circle_radius = 75;
-		int circle_origin_y = getHeight() / 2;
-		int circle_origin_x = getWidth() / 2;
+		int circleRadius = 75;
+		int circleOriginY = getHeight() / 2;
+		int circleOriginX = getWidth() / 2;
 		int thickness = 4;
 
-		drawCircle(offscreeng, circle_origin_x, circle_origin_y, circle_radius, thickness);
+		drawCircle(offscreeng, circleOriginX, circleOriginY, circleRadius, thickness);
 
 		//creation de la ligne de fond verticale ( drawLine(x1,y1,x2,y2) ) du point (x1,y1) au point (x2,y2)
 		// on en fait plusieurs pour gérer l'épaisseur du trait
@@ -528,18 +535,18 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 */
 	private static void drawCircle(Graphics g, int x, int y, int r, int thickness) {
 		// correction du rayon pour prendre en compte l'�paisseur du trait
-		r += thickness / 2;
+		int radius = r + thickness / 2;
 
 		for(int i=0; i < thickness; i++) {
 			drawCircle(g, x, y, r);
 
 			if (i+1 < thickness) {
-				drawCircle(g, x+1, y, r-1);
-				drawCircle(g, x-1, y, r-1);
-				drawCircle(g, x, y+1, r-1);
-				drawCircle(g, x, y-1, r-1);
+				drawCircle(g, x+1, y, radius-1);
+				drawCircle(g, x-1, y, radius-1);
+				drawCircle(g, x, y+1, radius-1);
+				drawCircle(g, x, y-1, radius-1);
 
-				r--;
+				radius--;
 			}
 		}
 	}
@@ -548,14 +555,14 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 * Fait clignoter l'interface (par exemple lorsqu'un point
 	 * a été marqué).
 	 */
-	protected void blink() {
+	protected final void blink() {
 		for (int i = 3; i > 0; i--) {
-			death_mode = true;
+			deathMode = true;
 			repaint();
 
 			wait(300);
 
-			death_mode = false;
+			deathMode = false;
 			repaint();
 
 			wait(300);
@@ -568,9 +575,9 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	private void displayScores() {
 		offscreeng.setFont(new Font("Dialog", Font.BOLD, 14));
 
-		offscreeng.drawString(String.format("Joueur 1 : %d", joueur1_score),
+		offscreeng.drawString(String.format("Joueur 1 : %d", joueur1Score),
 							  getWidth() / 10, 35);
-		offscreeng.drawString(String.format("Joueur 2 : %d", joueur2_score),
+		offscreeng.drawString(String.format("Joueur 2 : %d", joueur2Score),
 							  4 * getWidth() / 5, 35);
 	}
 
@@ -590,7 +597,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 *
 	 * @param msg Message à afficher dans la fenêtre.
 	 */
-	protected void showAlert(String msg) {
+	protected final void showAlert(String msg) {
 		JOptionPane.showMessageDialog(this, msg);
 	}
 

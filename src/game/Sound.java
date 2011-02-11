@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -37,11 +38,11 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-public class Sound extends Thread {
+public final class Sound extends Thread {
 
-    private static HashMap<String, InputStream> streams = new HashMap<String, InputStream>();
-    private static HashMap<String, AudioFormat> formats = new HashMap<String, AudioFormat>();
-    private String sound_to_play;
+    private static Map<String, InputStream> streams = new HashMap<String, InputStream>();
+    private static Map<String, AudioFormat> formats = new HashMap<String, AudioFormat>();
+    private String soundToPlay;
 
 
     /**
@@ -51,7 +52,7 @@ public class Sound extends Thread {
      * @param sound Son à lire
      */
     private Sound(String sound) {
-        sound_to_play = sound;
+        soundToPlay = sound;
     }
 
     /**
@@ -60,7 +61,7 @@ public class Sound extends Thread {
     @Override
     public void run() {
         try {
-            doPlay(sound_to_play);
+            doPlay(soundToPlay);
         } catch (Exception e) {
             //System.err.println("Erreur à la lecture du son "+sound_to_play+" : "+e.getMessage());
         }

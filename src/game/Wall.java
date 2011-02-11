@@ -32,7 +32,7 @@ import javax.imageio.ImageIO;
 
 public class Wall extends Rectangle {
     private static final long serialVersionUID = 1L;
-    private boolean is_visible = false;
+    private boolean isVisible = false;
     private BufferedImage img;
 
 
@@ -43,15 +43,15 @@ public class Wall extends Rectangle {
     }
 
     public void setVisible(boolean visible) {
-        is_visible = visible;
+        isVisible = visible;
     }
 
     public boolean isVisible() {
-        return is_visible;
+        return isVisible;
     }
 
     public void toggleVisibility() {
-        is_visible = !is_visible;
+        isVisible = !isVisible;
     }
 
     void drawOn(Graphics g) {

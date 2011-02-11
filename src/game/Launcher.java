@@ -66,12 +66,12 @@ public class Launcher extends JFrame {
 
     private class MirrorPongLauncher extends Thread {
         private int port;
-        private int nb_games;
+        private int nbGames;
         private JFrame parent;
 
-        public MirrorPongLauncher(JFrame parent, int port, int nb_games) {
+        public MirrorPongLauncher(JFrame parent, int port, int nbGames) {
             this.port = port;
-            this.nb_games = nb_games;
+            this.nbGames = nbGames;
             this.parent = parent;
         }
 
@@ -80,7 +80,7 @@ public class Launcher extends JFrame {
             MirrorPong pong = new MirrorPong();
 
             pong.setPort(port);
-            pong.setMaxPoints(nb_games);
+            pong.setMaxPoints(nbGames);
 
             try {
                 pong.start();
@@ -227,7 +227,7 @@ public class Launcher extends JFrame {
 
     private void Bouton_ValiderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Bouton_ValiderActionPerformed
         List<Thread> threads = new ArrayList<Thread>();
-        int port, nb_games;
+        int port, nbGames;
         
         //récuperation du choix dans la combo
         String serverOrClient = ComboServerOrClient.getSelectedItem().toString();
@@ -250,7 +250,7 @@ public class Launcher extends JFrame {
 
         // nombre de jeux
         try {
-            nb_games = ((Integer) js_nb_games.getValue()).intValue();
+            nbGames = ((Integer) js_nb_games.getValue()).intValue();
         } catch (Exception e) {
             alert("Nombre de jeux incorrect ");
             return;
@@ -258,11 +258,11 @@ public class Launcher extends JFrame {
 
         //on verifie si on veut un serveur ou un client et on lance le jeu
         if (serverOrClient.equals("Serveur"))
-            threads.add(new MirrorPongLauncher(this, port, nb_games));
+            threads.add(new MirrorPongLauncher(this, port, nbGames));
         else if (serverOrClient.equals("Client"))
             threads.add(new PongLauncher(this, host, port));
         else {
-            threads.add(new MirrorPongLauncher(this, port, nb_games));
+            threads.add(new MirrorPongLauncher(this, port, nbGames));
             threads.add(new PongLauncher(this, host, port));
         }
         
