@@ -349,10 +349,10 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
                 executeTwoArgsCmd(cmdName, args);
                 break;
             case 3:
-                executeThreeArgsCmd(cmd, args);
+                executeThreeArgsCmd(cmdName, args);
                 break;
             case 4:
-                executeFourArgsCmd(cmd, args);
+                executeFourArgsCmd(cmdName, args);
                 break;
         }
 	}

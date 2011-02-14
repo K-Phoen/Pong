@@ -174,10 +174,7 @@ public final class MirrorPong extends PongBase {
 			if(currentState() == State.PAUSED)
 				continue;
 
-			checkPlayerCollision(joueur1);
-			checkPlayerCollision(joueur2);
-            checkWallCollision(wall);
-			checkWalls();
+			checkCollisions();
             
 			moveBall();
 
@@ -188,10 +185,11 @@ public final class MirrorPong extends PongBase {
                 wall.toggleVisibility();
 
                 // envoi des infos du mur
-                sendToDistantPlayer(String.format("%s %d %d %s", Constants.MSG_WALL_POS,
-                                                  wall.x, wall.y, wall.isVisible() ? "on" : "off"));
+                String msg = String.format("%s %d %d %s", Constants.MSG_WALL_POS,
+                                           wall.x, wall.y,
+                                           wall.isVisible() ? "on" : "off");
+                sendToDistantPlayer(msg);
             }
-
 
 			// envoi de la position de la balle
 			sendToDistantPlayer(String.format("%s %d %d", Constants.MSG_BALL,
@@ -206,6 +204,13 @@ public final class MirrorPong extends PongBase {
 		// partie terminée
 		onGameOver();
 	}
+
+    private void checkCollisions() {
+        checkPlayerCollision(joueur1);
+        checkPlayerCollision(joueur2);
+        checkWallCollision(wall);
+        checkWalls();
+    }
 
     private void moveWall() {
         Random r = new Random();
