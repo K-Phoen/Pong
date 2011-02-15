@@ -22,6 +22,8 @@
 
 package game;
 
+import game.objects.Wall;
+import game.objects.Player;
 import game.Constants.State;
 import java.awt.Color;
 import java.awt.Font;
@@ -150,7 +152,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 		// création du mur
         try {
-            wall = new Wall(20, 75, Constants.IMG_WALL);
+            wall = new Wall(Constants.IMG_WALL);
         } catch (IOException e) {
 			showAlert("Impossible de charger le mur : "+e.getMessage());
 			System.exit(1);

@@ -22,6 +22,7 @@
 
 package game;
 
+import game.objects.Player;
 import game.Constants.State;
 import java.awt.event.MouseEvent;
 import java.io.IOException;

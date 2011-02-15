@@ -22,8 +22,9 @@
 
 package game;
 
+import game.objects.Wall;
+import game.objects.Player;
 import game.Constants.State;
-import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -95,6 +96,7 @@ public final class MirrorPong extends PongBase {
 		super.start();
 	}
 
+    @Override
     protected Player getMyPlayer() {
         return player1;
     }
@@ -297,14 +299,11 @@ public final class MirrorPong extends PongBase {
 	 * @return True s'il y a collision, false sinon
 	 */
 	private boolean checkCollision(Player joueur) {
-		Rectangle joueurZone = new Rectangle(joueur.getPos(),
-                                             new Dimension(Constants.RACKET_WIDTH,
-                                                           Constants.RACKET_HEIGHT));
 		Rectangle balleZone = new Rectangle(ballPoint.x - Constants.BALL_WIDTH / 2,
 											ballPoint.y - Constants.BALL_HEIGHT / 2,
 											Constants.BALL_WIDTH, Constants.BALL_HEIGHT);
 
-		return joueurZone.intersects(balleZone);
+		return joueur.getZone().intersects(balleZone);
 	}
 
 	/**
