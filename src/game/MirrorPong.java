@@ -23,7 +23,7 @@
 package game;
 
 import game.Constants.State;
-import java.awt.Point;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -94,6 +94,10 @@ public final class MirrorPong extends PongBase {
 
 		super.start();
 	}
+
+    protected Player getMyPlayer() {
+        return player1;
+    }
 
     /**
      * Attent qu'un client se connecte pour enregistrer son adresse et son
@@ -206,8 +210,8 @@ public final class MirrorPong extends PongBase {
 	}
 
     private void checkCollisions() {
-        checkPlayerCollision(joueur1);
-        checkPlayerCollision(joueur2);
+        checkPlayerCollision(player1);
+        checkPlayerCollision(player2);
         checkWallCollision(wall);
         checkWalls();
     }
@@ -218,22 +222,6 @@ public final class MirrorPong extends PongBase {
         wall.x = r.nextInt((int) effectsZone.getWidth()) + Constants.EFFECTS_ZONE_MARGIN;
         wall.y = r.nextInt((int) effectsZone.getHeight()) + Constants.EFFECTS_ZONE_MARGIN;
     }
-
-	/**
-	 * Met à jour la position du pavé du joueur 2 par rapport
-	 * aux mouvements de la souris
-	 *
-	 * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
-	 *
-	 * @param e Event lié à la souris
-	 */
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		joueur1.y = e.getY() - 25;
-
-		// envoi de la position du joueur 1
-		sendToDistantPlayer(String.format("%s P1 %d", Constants.MSG_MOVE, joueur1.y));
-	}
 
 	/**
 	 * (Re)démarre le jeu s'il est arrêté (pas commencé ou point marqué)
@@ -271,11 +259,11 @@ public final class MirrorPong extends PongBase {
 	 *
 	 * @param player Joueur dont on veut tester la collision avec la balle.
 	 */
-	private void checkPlayerCollision(Point player) {
+	private void checkPlayerCollision(Player player) {
 		if(!checkCollision(player))
 			return;
 
-		int racketHit = ballPoint.y - (player.y + 25);
+		int racketHit = ballPoint.y - (player.getPos().y + 25);
 
 		ballSpeed.y += racketHit / 7;
 		ballSpeed.x *= -1;
@@ -308,10 +296,10 @@ public final class MirrorPong extends PongBase {
 	 *
 	 * @return True s'il y a collision, false sinon
 	 */
-	private boolean checkCollision(Point joueur) {
-		Rectangle joueurZone = new Rectangle(joueur.x, joueur.y,
-											 Constants.RACKET_WIDTH,
-                                             Constants.RACKET_HEIGHT);
+	private boolean checkCollision(Player joueur) {
+		Rectangle joueurZone = new Rectangle(joueur.getPos(),
+                                             new Dimension(Constants.RACKET_WIDTH,
+                                                           Constants.RACKET_HEIGHT));
 		Rectangle balleZone = new Rectangle(ballPoint.x - Constants.BALL_WIDTH / 2,
 											ballPoint.y - Constants.BALL_HEIGHT / 2,
 											Constants.BALL_WIDTH, Constants.BALL_HEIGHT);
@@ -347,13 +335,18 @@ public final class MirrorPong extends PongBase {
 	@Override
 	protected void onWallTouched() {
 		if (ballSpeed.x >= 0)
-			joueur1Score++;
+			player1.incScore();
 		else
-			joueur2Score++;
+			player2.incScore();
 
 		// envoi des scores
-		sendToDistantPlayer(Constants.MSG_SCORE + " P1 " + joueur1Score);
-		sendToDistantPlayer(Constants.MSG_SCORE + " P2 " + joueur2Score);
+        String msg1 = String.format("%s %s %d", Constants.MSG_SCORE, player1,
+                                                player1.getScore());
+        String msg2 = String.format("%s %s %d", Constants.MSG_SCORE, player2,
+                                                player2.getScore());
+		
+        sendToDistantPlayer(msg1);
+		sendToDistantPlayer(msg2);
 
 		// envoi de l'info "mur touché"
 		sendToDistantPlayer(Constants.MSG_WALL_TOUCHED);
@@ -361,7 +354,7 @@ public final class MirrorPong extends PongBase {
 		super.onWallTouched();
 
         // ici, soit le jeu est terminé, soit on est en attente de la relance
-        changeState((joueur1Score == maxPoints || joueur2Score == maxPoints)
+        changeState((player1.getScore() == maxPoints || player2.getScore() == maxPoints)
                     ? State.FINISHED
                     : State.READY);
 
@@ -379,14 +372,4 @@ public final class MirrorPong extends PongBase {
 
         sendToDistantPlayer(String.format("%s %s", Constants.MSG_STATE_CHANGED, newState));
     }
-
-    /**
-     * Appelée dès que la partie est terminée
-     */
-	protected void onGameOver() {
-        String winner = (joueur1Score == maxPoints) ? "P1" : "P2";
-        
-		showAlert(winner.equals("P1")
-				  ? "Vous avez gagné \\o/" : "Vous avez perdu [-_-]\"");
-	}
 }

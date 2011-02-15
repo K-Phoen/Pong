@@ -125,20 +125,9 @@ public final class Pong extends PongBase {
         onGameOver();
 	}
 
-	/**
-	 * Met à jour la position du pavé du joueur 2 par rapport
-	 * aux mouvements de la souris
-	 *
-	 * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
-	 *
-	 * @param e Event lié à la souris
-	 */
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		joueur2.y = e.getY() - 25;
-
-		sendToDistantPlayer(String.format("%s P2 %s", Constants.MSG_MOVE, joueur2.y));
-	}
+    protected Player getMyPlayer() {
+        return player2;
+    }
 
     @Override
     protected void onGamePause() {
@@ -162,11 +151,4 @@ public final class Pong extends PongBase {
         wall.y = y;
         wall.setVisible(visible);
     }
-
-	protected void onGameOver() {
-        String winner = (joueur1Score > joueur2Score) ? "P1" : "P2";
-
-		showAlert(winner.equals("P2")
-				  ? "Vous avez gagné \\o/" : "Vous avez perdu [-_-]\"");
-	}
 }
