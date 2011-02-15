@@ -209,6 +209,12 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
     protected abstract Player getMyPlayer();
 
+    private boolean myWin() {
+        Player winner = (player1.getScore() > player2.getScore()) ? player1 : player2;
+
+        return getMyPlayer().equals(winner);
+    }
+
 	/**
 	 * Position la balle au centre du terrain, avec une vitesse nulle.
 	 */
@@ -280,11 +286,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	}
 
     protected void onGameOver() {
-        Player winner = (player1.getScore() > player2.getScore()) ? player1 : player2;
-
-		showAlert(winner.equals(getMyPlayer())
-				  ? "Vous avez gagné \\o/"
-                  : "Vous avez perdu [-_-]\"");
+        showAlert(myWin() ? "Vous avez gagné \\o/" : "Vous avez perdu [-_-]\"");
 	}
 
     protected void onWallMoved(int x, int y, boolean visible) {}
@@ -506,8 +508,8 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
                 offscreeng.drawString("Pause", getWidth() / 2 - 50, getHeight() / 2 );
 				break;
 			case FINISHED:
-				offscreeng.drawString("Game Over !", getWidth() / 2 - 110,
-									  getHeight() / 2);
+				offscreeng.drawString(myWin() ? "You win !" : "Game Over !",
+                                      getWidth() / 2 - 110, getHeight() / 2);
 				break;
 			default:
 				return false;
