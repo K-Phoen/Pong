@@ -30,16 +30,12 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 
-public class Wall extends Rectangle {
-    private static final long serialVersionUID = 1L;
+public class Wall extends GraphicObject {
     private boolean isVisible = false;
-    private BufferedImage img;
 
 
     public Wall(String img) throws IOException {
-        this.img = ImageIO.read(new File(img));
-
-        setSize(this.img.getWidth(), this.img.getHeight());
+        super(img);
     }
 
     public void setVisible(boolean visible) {
@@ -52,9 +48,5 @@ public class Wall extends Rectangle {
 
     public void toggleVisibility() {
         isVisible = !isVisible;
-    }
-
-    public void drawOn(Graphics g) {
-        g.drawImage(img, x, y, null);
     }
 }

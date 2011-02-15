@@ -1,5 +1,5 @@
 /*
- *  Player.java
+ *  GraphicObject.java
  *
  *  Copyright 2011 Kévin Gomez Pinto <contact@kevingomez.fr>
  *                 Jonathan Da Silva <Jonathan.Da_Silva1@etudiant.u-clermont1.fr>
@@ -22,9 +22,7 @@
 
 package game.objects;
 
-import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -32,55 +30,24 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 
-public class Player extends GraphicObject {
-    private int id;
-    private int score = 0;
+public abstract class GraphicObject extends Rectangle {
+    private static final long serialVersionUID = 1L;
+    
+    private BufferedImage img;
 
-    public Player(int id, String img) throws IOException {
-        super(img);
-        
-        this.id = id;
-        setPos(-1, -1);
+
+    public GraphicObject(String img) throws IOException {
+        this.img = ImageIO.read(new File(img));
+
+        setSize(this.img.getWidth(), this.img.getHeight());
     }
 
-    public Rectangle getZone() {
-        return new Rectangle(new Point(x, y), new Dimension((int) getWidth(),
-                                                            (int) getHeight()));
+    public void setPos(int x, int y) {
+        this.x = x;
+        this.y = y;
     }
 
-    public void incScore() {
-        ++score;
-    }
-
-    public void setScore(int score) {
-        this.score = score;
-    }
-
-    public int getScore() {
-        return score;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if(!(obj instanceof Player))
-            return false;
-
-        Player p = (Player) obj;
-
-        return p.getId() == getId();
-    }
-
-    @Override
-    public int hashCode() {
-        return 97 * 3 + this.id;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("P%d", id);
+    public void drawOn(Graphics g) {
+        g.drawImage(img, x, y, null);
     }
 }

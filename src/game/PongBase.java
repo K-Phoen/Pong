@@ -345,9 +345,9 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	public void mouseMoved(MouseEvent e) {
         Player player = getMyPlayer();
 
-		player.setY(e.getY() - 25);
+		player.y = e.getY() - 25;
 		sendToDistantPlayer(String.format("%s %s %s", Constants.MSG_MOVE,
-                                                      player, player.getPos().y));
+                                                      player, player.y));
 	}
 
 	@Override
@@ -410,9 +410,9 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
             int y = Integer.parseInt(args[2]);
 
             if(args[1].equals("P1"))
-                player1.setY(y);
+                player1.y = y;
             else
-                player2.setY(y);
+                player2.y = y;
         } else if(cmd.equals(Constants.MSG_BALL)) { // changement de la position de la balle
             ballPoint.x = Integer.parseInt(args[1]);
             ballPoint.y = Integer.parseInt(args[2]);

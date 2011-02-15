@@ -265,7 +265,7 @@ public final class MirrorPong extends PongBase {
 		if(!checkCollision(player))
 			return;
 
-		int racketHit = ballPoint.y - (player.getPos().y + 25);
+		int racketHit = ballPoint.y - (player.y + 25);
 
 		ballSpeed.y += racketHit / 7;
 		ballSpeed.x *= -1;
