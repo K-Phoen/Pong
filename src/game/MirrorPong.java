@@ -219,8 +219,8 @@ public final class MirrorPong extends PongBase {
     private void moveWall() {
         Random r = new Random();
 
-        wall.x = r.nextInt((int) effectsZone.getWidth()) + Constants.EFFECTS_ZONE_MARGIN;
-        wall.y = r.nextInt((int) effectsZone.getHeight()) + Constants.EFFECTS_ZONE_MARGIN;
+        wall.x = r.nextInt((int) wallZone.getWidth()) + Constants.EFFECTS_ZONE_MARGIN;
+        wall.y = r.nextInt((int) wallZone.getHeight()) + Constants.EFFECTS_ZONE_MARGIN;
     }
 
 	/**

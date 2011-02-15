@@ -79,7 +79,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	private State state = State.WAITING;
 
     protected Wall wall;
-    protected Rectangle effectsZone;
+    protected Rectangle wallZone;
 
 	private Image offscreeni;
 	private Graphics offscreeng;
@@ -124,10 +124,6 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		addMouseMotionListener(this);
 		addKeyListener(this);
 
-		// création du plateau de jeu
-		offscreeni = createImage(getWidth(), getHeight());
-		offscreeng = offscreeni.getGraphics();
-
         // création des joueurs
         try {
             player1 = new Player(1, Constants.IMG_RACKET_P1);
@@ -141,7 +137,11 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
         player1.setPos(35, getHeight() / 2 - 25);
         player2.setPos(getWidth() - 45, getHeight() / 2 - 25);
 
-        effectsZone = new Rectangle(Constants.EFFECTS_ZONE_MARGIN,
+        // création du plateau de jeu
+		offscreeni = createImage(getWidth(), getHeight());
+		offscreeng = offscreeni.getGraphics();
+
+        wallZone = new Rectangle(Constants.EFFECTS_ZONE_MARGIN,
                                     Constants.EFFECTS_ZONE_MARGIN,
                                     getWidth() - 2 * Constants.EFFECTS_ZONE_MARGIN,
                                     getHeight() - 2 * Constants.EFFECTS_ZONE_MARGIN);
