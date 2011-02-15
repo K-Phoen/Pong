@@ -46,6 +46,24 @@ public final class MirrorPong extends PongBase {
 	 */
 	private int maxPoints = 1;
 
+    /**
+     * Niveaux de difficulté disponibles :
+     *  - Noob : jeu normal, vitesse de balle fixe
+     *  - Easy : la vitesse augmente en fonction du temps de jeu
+     *  - Medium : un mur apparait de temps en temps
+     *  - Hard : trois raquettes ?
+     *
+     * Bien évidemment, les difficultés s'aditionnent ...
+     */
+    private enum Level {
+        NOOB, EASY, MEDIUM, HARD
+    }
+    
+    /**
+     * Difficulté courante
+     */
+    private Level level = Level.MEDIUM;
+
 
 	/**
 	 * Programme principal
@@ -183,8 +201,8 @@ public final class MirrorPong extends PongBase {
             
 			moveBall();
 
-            // gestion du mur "amovible"
-            if(r.nextInt(200) == 34)
+            // gestion du mur "amovible" : seulement à partir de medium
+            if(r.nextInt(200) == 34 && level.compareTo(Level.MEDIUM) >= 0)
             {
                 moveWall();
                 wall.toggleVisibility();
@@ -263,10 +281,8 @@ public final class MirrorPong extends PongBase {
 		if(!checkCollision(player))
 			return;
 
-		int racketHit = ball.y - (player.y + 25);
-
-		ball.getSpeed().y += racketHit / 7;
-		ball.getSpeed().x *= -1;
+		int racketHit = (ball.y - (player.y + 25)) / 7;
+		speedBallUp(racketHit);
 
 		sendToDistantPlayer(Constants.MSG_CONTACT);
 		Sound.play(Constants.SOUND_CONTACT);
@@ -276,14 +292,20 @@ public final class MirrorPong extends PongBase {
         if(!wall.isVisible() || !wall.intersects(ball.getZone()))
             return;
 
-		int racketHit = ball.y - (wall.y + 25);
-
-		ball.getSpeed().y += racketHit / 7;
-		ball.getSpeed().x = -ball.getSpeed().x;
+		int racketHit = (ball.y - (wall.y + 25)) / 7;
+		speedBallUp(racketHit);
 
 		sendToDistantPlayer(Constants.MSG_CONTACT);
 		Sound.play(Constants.SOUND_CONTACT);
 	}
+
+    private void speedBallUp(int hit) {
+        // à partir de easy, on augmente la vitesse
+        if(level.compareTo(Level.EASY) >= 0)
+            ball.getSpeed().y += hit;
+
+		ball.getSpeed().x *= -1;
+    }
 
 	/**
 	 * Teste la collision entre la balle et la raquette d'un joueur

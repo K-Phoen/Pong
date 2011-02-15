@@ -104,7 +104,7 @@ public final class Sound extends Thread {
      */
     public static void play(String sound) {
         Thread t = new Sound(sound);
-		//t.setPriority(Thread.MIN_PRIORITY);
+		t.setPriority(Thread.MIN_PRIORITY);
 
 		t.start();
     }
