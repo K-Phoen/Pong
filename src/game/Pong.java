@@ -24,7 +24,6 @@ package game;
 
 import game.objects.Player;
 import game.Constants.State;
-import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
@@ -85,15 +84,7 @@ public final class Pong extends PongBase {
 
 		initGUI("Pong");
 
-		// un espèce de handshake
-		while(true) {
-			try {
-				sock.sendAndWaitConfirm(getDistantHost(), getDistantPort(), "HELLO", 2000);
-				break;
-			} catch (IOException e) {
-				showAlert("Erreur à l'envoi de la demande de connexion au serveur : " + e.getMessage());
-			}
-		}
+		waitServer();
 
 		super.start();
 	}
@@ -118,7 +109,7 @@ public final class Pong extends PongBase {
 
 			repaint();
 
-            wait(5);
+            //wait(5);
 		}
 
         repaint();
@@ -126,6 +117,7 @@ public final class Pong extends PongBase {
         onGameOver();
 	}
 
+    @Override
     protected Player getMyPlayer() {
         return player2;
     }
@@ -151,5 +143,17 @@ public final class Pong extends PongBase {
         wall.x = x;
         wall.y = y;
         wall.setVisible(visible);
+    }
+
+    private void waitServer() {
+        // un espèce de handshake
+		while(true) {
+			try {
+				sock.sendAndWaitConfirm(getDistantHost(), getDistantPort(), "HELLO", 2000);
+				break;
+			} catch (IOException e) {
+				showAlert("Erreur à l'envoi de la demande de connexion au serveur : " + e.getMessage());
+			}
+		}
     }
 }

@@ -25,7 +25,6 @@ package game;
 import game.objects.Wall;
 import game.objects.Player;
 import game.Constants.State;
-import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Random;

@@ -486,8 +486,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	}
 
 	/**
-	 * Affiche le message correspondant à l'état du jeu (s'il y en
-	 * a un).
+	 * Affiche le message correspondant à l'état du jeu (s'il y en a un).
 	 *
 	 * @return true si un message a été affiché, false sinon
 	 */
@@ -568,7 +567,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 * @param thickness Pen thickness of circle drawn.
 	 */
 	private static void drawCircle(Graphics g, int x, int y, int r, int thickness) {
-		// correction du rayon pour prendre en compte l'�paisseur du trait
+		// correction du rayon pour prendre en compte l'épaisseur du trait
 		int radius = r + thickness / 2;
 
 		for(int i=0; i < thickness; i++) {
@@ -625,9 +624,8 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	}
 
 	/**
-	 * Affiche une boite de dialogue contenant le message
-	 * passé en paramètre. Seul le bouton "OK" est proposé
-	 * par la fenêtre affichée.
+	 * Affiche une boite de dialogue contenant le message passé en paramètre.
+     * Seul le bouton "OK" est proposé par la fenêtre affichée.
 	 *
 	 * @param msg Message à afficher dans la fenêtre.
 	 */

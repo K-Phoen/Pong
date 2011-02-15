@@ -29,8 +29,8 @@ public interface Constants {
 	 */
 	String MSG_MOVE 			= "move";
 	String MSG_BALL 			= "ball";
-	String MSG_SCORE           = "score";
-	String MSG_CONTACT         = "contact";
+	String MSG_SCORE            = "score";
+	String MSG_CONTACT          = "contact";
 	String MSG_WALL_TOUCHED 	= "wall";
     String MSG_STATE_CHANGED	= "state";
     String MSG_WALL_POS       	= "wall_pos";
