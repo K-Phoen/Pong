@@ -126,10 +126,6 @@ public class Connection {
 		return null;
 	}
 
-	public void sendAndWaitConfirm(InetAddress addr, int port, String msg) throws IOException {
-		sendAndWaitConfirm(addr, port, msg, 0);
-	}
-
 	public void sendAndWaitConfirm(InetAddress addr, int port, String msg, int timeout) throws IOException {
 		toConfirm++;
 
