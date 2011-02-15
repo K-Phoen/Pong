@@ -32,90 +32,90 @@ import network.Paquet;
 
 
 public final class Pong extends PongBase {
-	private static final long serialVersionUID = 7657998555042629676L;
+    private static final long serialVersionUID = 7657998555042629676L;
 
 
-	/**
-	 * Programme principal
-	 *
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		Pong jp = new Pong();
+    /**
+     * Programme principal
+     *
+     * @param args
+     */
+    public static void main(String[] args) {
+        Pong jp = new Pong();
 
-		String host = "localhost";
+        String host = "localhost";
 
-		if(args.length == 2) {
-			host = args[0];
+        if(args.length == 2) {
+            host = args[0];
 
-			try {
-				jp.setDistantPort(Integer.parseInt(args[1]));
-			} catch(NumberFormatException e) {
-				System.err.println("Port incorrect : utilisation du port 6000");
-				// on ne modifie pas le port par défaut
-			}
-		}
+            try {
+                jp.setDistantPort(Integer.parseInt(args[1]));
+            } catch(NumberFormatException e) {
+                System.err.println("Port incorrect : utilisation du port 6000");
+                // on ne modifie pas le port par défaut
+            }
+        }
 
-		try {
-			jp.setDistantHost(host);
-		} catch (UnknownHostException e) {
-			System.err.println("Impossible de contacter le serveur : " + e);
-			System.exit(1);
-		}
+        try {
+            jp.setDistantHost(host);
+        } catch (UnknownHostException e) {
+            System.err.println("Impossible de contacter le serveur : " + e);
+            System.exit(1);
+        }
 
-		jp.start();
-	}
+        jp.start();
+    }
 
 
-	/**
-	 * Connexion serveur avant l'initialisation de la partie graphique
-	 * et du jeu en lui même.
+    /**
+     * Connexion serveur avant l'initialisation de la partie graphique
+     * et du jeu en lui même.
      *
      * @throws IllegalStateException Si la connexion au serveur est impossible
      */
-	@Override
-	public void start() {
-		// connexion au serveur
-		try{
-			sock = new Connection();
-		} catch (IOException e) {
-			throw new IllegalStateException("Erreur à la connexion : " + e.getMessage());
-		}
+    @Override
+    public void start() {
+        // connexion au serveur
+        try{
+            sock = new Connection();
+        } catch (IOException e) {
+            throw new IllegalStateException("Erreur à la connexion : " + e.getMessage());
+        }
 
-		initGUI("Pong");
+        initGUI("Pong");
 
-		waitServer();
+        waitServer();
 
-		super.start();
-	}
+        super.start();
+    }
 
-	/**
-	 * On met à jour le jeu selon les infos transmises par le serveur
-	 *
-	 * @note Sera appelée par le thread.
-	 */
-	@Override
-	public void run() {
-		Paquet p;
-		while (currentState() != State.FINISHED) {
-			try {
-				p = sock.tryReceive(5);
-			} catch (IOException e) {
-				p = null;
-			}
+    /**
+     * On met à jour le jeu selon les infos transmises par le serveur
+     *
+     * @note Sera appelée par le thread.
+     */
+    @Override
+    public void run() {
+        Paquet p;
+        while (currentState() != State.FINISHED) {
+            try {
+                p = sock.tryReceive(5);
+            } catch (IOException e) {
+                p = null;
+            }
 
-			if(p != null && p.getMessage() != null)
-				executeCmd(p.getMessage());
+            if(p != null && p.getMessage() != null)
+                executeCmd(p.getMessage());
 
-			repaint();
+            repaint();
 
             //wait(5);
-		}
+        }
 
         repaint();
 
         onGameOver();
-	}
+    }
 
     @Override
     protected Player getMyPlayer() {
@@ -147,13 +147,13 @@ public final class Pong extends PongBase {
 
     private void waitServer() {
         // un espèce de handshake
-		while(true) {
-			try {
-				sock.sendAndWaitConfirm(getDistantHost(), getDistantPort(), "HELLO", 2000);
-				break;
-			} catch (IOException e) {
-				showAlert("Erreur à l'envoi de la demande de connexion au serveur : " + e.getMessage());
-			}
-		}
+        while(true) {
+            try {
+                sock.sendAndWaitConfirm(getDistantHost(), getDistantPort(), "HELLO", 2000);
+                break;
+            } catch (IOException e) {
+                showAlert("Erreur à l'envoi de la demande de connexion au serveur : " + e.getMessage());
+            }
+        }
     }
 }

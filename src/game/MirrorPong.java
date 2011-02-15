@@ -34,66 +34,66 @@ import network.Paquet;
 
 
 public final class MirrorPong extends PongBase {
-	/**
-	 * ID de sérialisation
-	 */
-	private static final long serialVersionUID = 7224334478468671910L;
+    /**
+     * ID de sérialisation
+     */
+    private static final long serialVersionUID = 7224334478468671910L;
 
-	private int serverPort = 6000;
+    private int serverPort = 6000;
 
-	/**
-	 * Nombre de points à atteindre pour remporter le match
-	 */
-	private int maxPoints = 1;
+    /**
+     * Nombre de points à atteindre pour remporter le match
+     */
+    private int maxPoints = 1;
 
 
-	/**
-	 * Programme principal
-	 *
-	 * @param args arguments du programme (port)
-	 */
-	public static void main(String[] args) {
-		MirrorPong jp = new MirrorPong();
+    /**
+     * Programme principal
+     *
+     * @param args arguments du programme (port)
+     */
+    public static void main(String[] args) {
+        MirrorPong jp = new MirrorPong();
         
-		if(args.length == 1) {
-			try {
-				jp.setPort(Integer.parseInt(args[0]));
-			} catch(NumberFormatException e) {
-				System.err.println("Port incorrect : utilisation du port 6000");
-				// on ne modifie pas le port par défaut
-			}
-		}
+        if(args.length == 1) {
+            try {
+                jp.setPort(Integer.parseInt(args[0]));
+            } catch(NumberFormatException e) {
+                System.err.println("Port incorrect : utilisation du port 6000");
+                // on ne modifie pas le port par défaut
+            }
+        }
 
-		jp.start();
-	}
+        jp.start();
+    }
 
 
-	/**
-	 * Création du serveur avant l'initialisation de la partie graphique
-	 * et du jeu en lui même.
+    /**
+     * Création du serveur avant l'initialisation de la partie graphique
+     * et du jeu en lui même.
      *
      * @throws IllegalStateException Si la création du serveur est impossible
      */
-	@SuppressWarnings("null")
-	@Override
-	public void start() {
-		// lancement du serveur
-		try {
-			sock = new Connection(serverPort);
-		} catch (Exception e) {
-			throw new IllegalStateException("Erreur au lancement du serveur : " + e.getLocalizedMessage());
-		}
+    @SuppressWarnings("null")
+    @Override
+    public void start() {
+        // lancement du serveur
+        try {
+            sock = new Connection(serverPort);
+        } catch (Exception e) {
+            throw new IllegalStateException("Erreur au lancement du serveur : " + e.getLocalizedMessage());
+        }
 
-		// création de la GUI
-		initGUI("MirrorPong");
+        // création de la GUI
+        initGUI("MirrorPong");
 
         // attente d'un client
         waitClient();
 
-		changeState(State.READY);
+        changeState(State.READY);
 
-		super.start();
-	}
+        super.start();
+    }
 
     @Override
     protected Player getMyPlayer() {
@@ -106,23 +106,23 @@ public final class MirrorPong extends PongBase {
      */
     private void waitClient() {
         // attente de la connexion du second joueur
-		Paquet p = null;
-		String msg = "";
-		while(!msg.equals("HELLO")) {
-			try {
-				p = sock.receive();
-			} catch (IOException e) {
-				continue;
-			}
+        Paquet p = null;
+        String msg = "";
+        while(!msg.equals("HELLO")) {
+            try {
+                p = sock.receive();
+            } catch (IOException e) {
+                continue;
+            }
 
-			if(p == null)
-				continue;
+            if(p == null)
+                continue;
 
-			msg = p.getMessage();
-		}
+            msg = p.getMessage();
+        }
 
-		setDistantHost(p.getDatagram().getAddress());
-		setDistantPort(p.getDatagram().getPort());
+        setDistantHost(p.getDatagram().getAddress());
+        setDistantPort(p.getDatagram().getPort());
     }
 
     /**
@@ -154,34 +154,34 @@ public final class MirrorPong extends PongBase {
         serverPort = port;
     }
 
-	/**
-	 * On met à jour les mouvements des joueurs dans l'affichage après avoir
-	 * effectué quelques vérifications sur l'état du jeu et déplacé la balle.
-	 *
-	 * @note Sera appelée par le thread.
-	 */
-	@Override
-	public void run() {
-		Paquet p;
+    /**
+     * On met à jour les mouvements des joueurs dans l'affichage après avoir
+     * effectué quelques vérifications sur l'état du jeu et déplacé la balle.
+     *
+     * @note Sera appelée par le thread.
+     */
+    @Override
+    public void run() {
+        Paquet p;
         Random r = new Random();
-		while (currentState() != State.FINISHED) {
+        while (currentState() != State.FINISHED) {
             repaint();
             
-			try {
-				p = sock.tryReceive(5);
-			} catch (IOException e) {
-				p = null;
-			}
+            try {
+                p = sock.tryReceive(5);
+            } catch (IOException e) {
+                p = null;
+            }
 
             if(p != null && p.getMessage() != null)
-				executeCmd(p.getMessage());
+                executeCmd(p.getMessage());
 
-			if(currentState() == State.PAUSED)
-				continue;
+            if(currentState() == State.PAUSED)
+                continue;
 
-			checkCollisions();
+            checkCollisions();
             
-			moveBall();
+            moveBall();
 
             // gestion du mur "amovible"
             if(r.nextInt(200) == 34)
@@ -196,18 +196,18 @@ public final class MirrorPong extends PongBase {
                 sendToDistantPlayer(msg);
             }
 
-			// envoi de la position de la balle
-			sendToDistantPlayer(String.format("%s %d %d", Constants.MSG_BALL,
+            // envoi de la position de la balle
+            sendToDistantPlayer(String.format("%s %d %d", Constants.MSG_BALL,
                                                           ball.x, ball.y));
 
             wait(5);
-		}
+        }
 
         repaint();
 
-		// partie terminée
-		onGameOver();
-	}
+        // partie terminée
+        onGameOver();
+    }
 
     private void checkCollisions() {
         checkPlayerCollision(player1);
@@ -223,132 +223,132 @@ public final class MirrorPong extends PongBase {
         wall.y = r.nextInt((int) wallZone.getHeight()) + Constants.EFFECTS_ZONE_MARGIN;
     }
 
-	/**
-	 * (Re)démarre le jeu s'il est arrêté (pas commencé ou point marqué)
-	 *
-	 * @param e Event lié à la souris
-	 *
-	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		if (currentState() != State.READY)
-			return;
+    /**
+     * (Re)démarre le jeu s'il est arrêté (pas commencé ou point marqué)
+     *
+     * @param e Event lié à la souris
+     *
+     * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+     */
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        if (currentState() != State.READY)
+            return;
 
-		ball.getSpeed().x = 4;
-		ball.getSpeed().y = 2;
+        ball.getSpeed().x = 4;
+        ball.getSpeed().y = 2;
 
         // comme ça la balle n'est pas tout le temps lancée du même côté
         if(System.currentTimeMillis() % 2 == 0)
             ball.getSpeed().x *= -1;
 
-		changeState(State.STARTED); // demarre le jeu
-	}
+        changeState(State.STARTED); // demarre le jeu
+    }
 
-	/**
-	 * Déplace la balle selon sa vitesse actuelle.
-	 */
-	protected void moveBall() {
-		ball.x += ball.getSpeed().x;
-		ball.y += ball.getSpeed().y;
-	}
+    /**
+     * Déplace la balle selon sa vitesse actuelle.
+     */
+    protected void moveBall() {
+        ball.x += ball.getSpeed().x;
+        ball.y += ball.getSpeed().y;
+    }
 
-	/**
-	 * Teste la collision entre la balle et un joueur,
-	 * et lance les actions associées si elle est avérée.
-	 *
-	 * @param player Joueur dont on veut tester la collision avec la balle.
-	 */
-	private void checkPlayerCollision(Player player) {
-		if(!checkCollision(player))
-			return;
+    /**
+     * Teste la collision entre la balle et un joueur,
+     * et lance les actions associées si elle est avérée.
+     *
+     * @param player Joueur dont on veut tester la collision avec la balle.
+     */
+    private void checkPlayerCollision(Player player) {
+        if(!checkCollision(player))
+            return;
 
-		int racketHit = ball.y - (player.y + 25);
+        int racketHit = ball.y - (player.y + 25);
 
-		ball.getSpeed().y += racketHit / 7;
-		ball.getSpeed().x *= -1;
+        ball.getSpeed().y += racketHit / 7;
+        ball.getSpeed().x *= -1;
 
-		sendToDistantPlayer(Constants.MSG_CONTACT);
-		Sound.play(Constants.SOUND_CONTACT);
-	}
+        sendToDistantPlayer(Constants.MSG_CONTACT);
+        Sound.play(Constants.SOUND_CONTACT);
+    }
 
     private void checkWallCollision(Wall wall) {
         if(!wall.isVisible() || !wall.intersects(ball.getZone()))
             return;
 
-		int racketHit = ball.y - (wall.y + 25);
+        int racketHit = ball.y - (wall.y + 25);
 
-		ball.getSpeed().y += racketHit / 7;
-		ball.getSpeed().x = -ball.getSpeed().x;
+        ball.getSpeed().y += racketHit / 7;
+        ball.getSpeed().x = -ball.getSpeed().x;
 
-		sendToDistantPlayer(Constants.MSG_CONTACT);
-		Sound.play(Constants.SOUND_CONTACT);
-	}
+        sendToDistantPlayer(Constants.MSG_CONTACT);
+        Sound.play(Constants.SOUND_CONTACT);
+    }
 
-	/**
-	 * Teste la collision entre la balle et la raquette d'un joueur
-	 *
-	 * @param joueur Position de la raquette du joueur
-	 *
-	 * @return True s'il y a collision, false sinon
-	 */
-	private boolean checkCollision(Player joueur) {
-		return joueur.getZone().intersects(ball.getZone());
-	}
+    /**
+     * Teste la collision entre la balle et la raquette d'un joueur
+     *
+     * @param joueur Position de la raquette du joueur
+     *
+     * @return True s'il y a collision, false sinon
+     */
+    private boolean checkCollision(Player joueur) {
+        return joueur.getZone().intersects(ball.getZone());
+    }
 
-	/**
-	 * Vérifie que la balle ne soit pas en collision avec un mur.
-	 */
-	protected void checkWalls() {
-		int ballLeft = ball.x - (int) ball.getWidth() / 2;
-		int ballTop = ball.y - (int) ball.getHeight() / 2;
-		int ballRight = ball.x + (int) ball.getWidth();
-		int ballBottom = ball.y;
+    /**
+     * Vérifie que la balle ne soit pas en collision avec un mur.
+     */
+    protected void checkWalls() {
+        int ballLeft = ball.x - (int) ball.getWidth() / 2;
+        int ballTop = ball.y - (int) ball.getHeight() / 2;
+        int ballRight = ball.x + (int) ball.getWidth();
+        int ballBottom = ball.y;
 
-		// gauche ou droit
-		if (ballLeft <= plane.x || ballRight >= plane.width) {
-			onWallTouched();
-			return;
-		}
+        // gauche ou droit
+        if (ballLeft <= plane.x || ballRight >= plane.width) {
+            onWallTouched();
+            return;
+        }
 
-		// haut ou bas : la balle rebondit
-		if (ballTop <= plane.y || ballBottom >= plane.height)
-			ball.getSpeed().y = -ball.getSpeed().y;
-	}
+        // haut ou bas : la balle rebondit
+        if (ballTop <= plane.y || ballBottom >= plane.height)
+            ball.getSpeed().y = -ball.getSpeed().y;
+    }
 
-	/**
-	 * La balle a heurté un mur (derrière un des deux pavés).
-	 * On regarde de quel côté la balle touche le mur, ont met les scores à
+    /**
+     * La balle a heurté un mur (derrière un des deux pavés).
+     * On regarde de quel côté la balle touche le mur, ont met les scores à
      * jour et on les envoie au client
-	 */
-	@Override
-	protected void onWallTouched() {
-		if (ball.getSpeed().x >= 0)
-			player1.incScore();
-		else
-			player2.incScore();
+     */
+    @Override
+    protected void onWallTouched() {
+        if (ball.getSpeed().x >= 0)
+            player1.incScore();
+        else
+            player2.incScore();
 
-		// envoi des scores
+        // envoi des scores
         String msg1 = String.format("%s %s %d", Constants.MSG_SCORE, player1,
                                                 player1.getScore());
         String msg2 = String.format("%s %s %d", Constants.MSG_SCORE, player2,
                                                 player2.getScore());
-		
+
         sendToDistantPlayer(msg1);
-		sendToDistantPlayer(msg2);
+        sendToDistantPlayer(msg2);
 
-		// envoi de l'info "mur touché"
-		sendToDistantPlayer(Constants.MSG_WALL_TOUCHED);
+        // envoi de l'info "mur touché"
+        sendToDistantPlayer(Constants.MSG_WALL_TOUCHED);
 
-		super.onWallTouched();
+        super.onWallTouched();
 
         // ici, soit le jeu est terminé, soit on est en attente de la relance
         changeState((player1.getScore() == maxPoints || player2.getScore() == maxPoints)
                     ? State.FINISHED
                     : State.READY);
 
-		resetBall();
-	}
+        resetBall();
+    }
 
     /**
      * Chaque fois que l'état du jeu change, on prévient le client

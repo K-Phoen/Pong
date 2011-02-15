@@ -25,26 +25,26 @@ package game;
 
 public interface Constants {
     /**
-	 * Liste des instructions reconnues par notre "protocole"
-	 */
-	String MSG_MOVE 			= "move";
-	String MSG_BALL 			= "ball";
-	String MSG_SCORE            = "score";
-	String MSG_CONTACT          = "contact";
-	String MSG_WALL_TOUCHED 	= "wall";
-    String MSG_STATE_CHANGED	= "state";
-    String MSG_WALL_POS       	= "wall_pos";
+     * Liste des instructions reconnues par notre "protocole"
+     */
+    String MSG_MOVE             = "move";
+    String MSG_BALL             = "ball";
+    String MSG_SCORE            = "score";
+    String MSG_CONTACT          = "contact";
+    String MSG_WALL_TOUCHED     = "wall";
+    String MSG_STATE_CHANGED    = "state";
+    String MSG_WALL_POS           = "wall_pos";
 
-	/**
-	 * Localisation des ressources sur le disque dur
-	 */
-	String SOUND_CONTACT   = "./data/pong.wav";
+    /**
+     * Localisation des ressources sur le disque dur
+     */
+    String SOUND_CONTACT   = "./data/pong.wav";
     String SOUND_START     = "./data/baseball.wav";
 
-	String IMG_BALL 		= "./data/ball.png";
-    String IMG_WALL 		= "./data/mur.png";
-	String IMG_RACKET_P1	= "./data/raquette.png";
-	String IMG_RACKET_P2	= "./data/raquette2.png";
+    String IMG_BALL         = "./data/ball.png";
+    String IMG_WALL         = "./data/mur.png";
+    String IMG_RACKET_P1    = "./data/raquette.png";
+    String IMG_RACKET_P2    = "./data/raquette2.png";
     
     int EFFECTS_ZONE_MARGIN = 150;
 
@@ -52,6 +52,6 @@ public interface Constants {
      * Représente un état du jeu
      */
     enum State {
-		WAITING, READY, STARTED, PAUSED, FINISHED
-	}
+        WAITING, READY, STARTED, PAUSED, FINISHED
+    }
 }
