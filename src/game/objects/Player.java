@@ -22,14 +22,7 @@
 
 package game.objects;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import javax.imageio.ImageIO;
 
 
 public class Player extends GraphicObject {
@@ -41,11 +34,6 @@ public class Player extends GraphicObject {
         
         this.id = id;
         setPos(-1, -1);
-    }
-
-    public Rectangle getZone() {
-        return new Rectangle(new Point(x, y), new Dimension((int) getWidth(),
-                                                            (int) getHeight()));
     }
 
     public void incScore() {

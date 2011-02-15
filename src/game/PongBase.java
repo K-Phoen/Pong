@@ -25,24 +25,21 @@ package game;
 import game.objects.Wall;
 import game.objects.Player;
 import game.Constants.State;
+import game.objects.Ball;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -87,14 +84,13 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	private Image offscreeni;
 	private Graphics offscreeng;
 	protected Rectangle plane;
-    private BufferedImage imgBall;
 
     /**
      * Joueurs
      */
     protected Player player1, player2;
 
-	protected Point ballPoint, ballSpeed;
+    protected Ball ball;
 
 	/**
 	 * Utilisée pour faire clignoter le jeu
@@ -160,7 +156,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 
 		// chargement de l'image de la balle
 		try {
-			imgBall = ImageIO.read(new File(Constants.IMG_BALL));
+			ball = new Ball(Constants.IMG_BALL);
 		} catch (IOException e) {
 			showAlert("Impossible de charger la balle : "+e.getMessage());
 			System.exit(1);
@@ -217,8 +213,10 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 * Position la balle au centre du terrain, avec une vitesse nulle.
 	 */
 	protected final void resetBall() {
-		ballPoint = new Point(getWidth() / 2, getHeight() / 2);
-		ballSpeed = new Point(0, 0);
+		ball.x = getWidth() / 2;
+        ball.y = getHeight() / 2;
+        
+		ball.setSpeed(0, 0);
 	}
 
 	/**
@@ -414,8 +412,8 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
             else
                 player2.y = y;
         } else if(cmd.equals(Constants.MSG_BALL)) { // changement de la position de la balle
-            ballPoint.x = Integer.parseInt(args[1]);
-            ballPoint.y = Integer.parseInt(args[2]);
+            ball.x = Integer.parseInt(args[1]);
+            ball.y = Integer.parseInt(args[2]);
         } else if(cmd.equals(Constants.MSG_SCORE)) { // mise à jour des scores
             int score = Integer.parseInt(args[2]);
 
@@ -480,8 +478,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
                     wall.drawOn(offscreeng);
 
 				// affichage de la balle
-				offscreeng.drawImage(imgBall, ballPoint.x - Constants.BALL_WIDTH / 2,
-									 ballPoint.y - Constants.BALL_HEIGHT / 2, null);
+                ball.drawOn(offscreeng);
 			}
 		}
 

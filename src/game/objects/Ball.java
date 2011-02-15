@@ -1,5 +1,5 @@
 /*
- *  GraphicObject.java
+ *  Ball.java
  *
  *  Copyright 2011 Kévin Gomez Pinto <contact@kevingomez.fr>
  *                 Jonathan Da Silva <Jonathan.Da_Silva1@etudiant.u-clermont1.fr>
@@ -26,34 +26,36 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import javax.imageio.ImageIO;
 
 
-public abstract class GraphicObject extends Rectangle {
+public class Ball extends GraphicObject {
     private static final long serialVersionUID = 1L;
-    
-    protected BufferedImage img;
+    private Point speed;
 
+    public Ball(String img) throws IOException {
+        super(img);
 
-    public GraphicObject(String img) throws IOException {
-        this.img = ImageIO.read(new File(img));
-
-        setSize(this.img.getWidth(), this.img.getHeight());
+        speed = new Point(0, 0);
     }
 
-    public void setPos(int x, int y) {
-        this.x = x;
-        this.y = y;
+    public Point getSpeed() {
+        return speed;
     }
 
+    public void setSpeed(int x, int y) {
+        speed.x = x;
+        speed.y = y;
+    }
+
+    @Override
     public void drawOn(Graphics g) {
-        g.drawImage(img, x, y, null);
+        g.drawImage(img, x - (int) getWidth() / 2, y - (int) getHeight() / 2, null);
     }
 
+    @Override
     public Rectangle getZone() {
-        return new Rectangle(x, y, (int) getWidth(), (int) getHeight());
+        return new Rectangle(x - (int) getWidth() / 2, y - (int) getHeight() / 2,
+                              (int) getWidth(), (int) getHeight());
     }
 }

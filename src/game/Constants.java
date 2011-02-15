@@ -46,8 +46,6 @@ public interface Constants {
 	String IMG_RACKET_P1	= "./data/raquette.png";
 	String IMG_RACKET_P2	= "./data/raquette2.png";
     
-	int BALL_WIDTH = 32, BALL_HEIGHT = 32;
-
     int EFFECTS_ZONE_MARGIN = 150;
 
     /**

@@ -199,8 +199,7 @@ public final class MirrorPong extends PongBase {
 
 			// envoi de la position de la balle
 			sendToDistantPlayer(String.format("%s %d %d", Constants.MSG_BALL,
-                                                          ballPoint.x,
-                                                          ballPoint.y));
+                                                          ball.x, ball.y));
 
             wait(5);
 		}
@@ -237,12 +236,12 @@ public final class MirrorPong extends PongBase {
 		if (currentState() != State.READY)
 			return;
 
-		ballSpeed.x = 4;
-		ballSpeed.y = 2;
+		ball.getSpeed().x = 4;
+		ball.getSpeed().y = 2;
 
         // comme ça la balle n'est pas tout le temps lancée du même côté
         if(System.currentTimeMillis() % 2 == 0)
-            ballSpeed.x *= -1;
+            ball.getSpeed().x *= -1;
 
 		changeState(State.STARTED); // demarre le jeu
 	}
@@ -251,8 +250,8 @@ public final class MirrorPong extends PongBase {
 	 * Déplace la balle selon sa vitesse actuelle.
 	 */
 	protected void moveBall() {
-		ballPoint.x += ballSpeed.x;
-		ballPoint.y += ballSpeed.y;
+		ball.x += ball.getSpeed().x;
+		ball.y += ball.getSpeed().y;
 	}
 
 	/**
@@ -265,27 +264,23 @@ public final class MirrorPong extends PongBase {
 		if(!checkCollision(player))
 			return;
 
-		int racketHit = ballPoint.y - (player.y + 25);
+		int racketHit = ball.y - (player.y + 25);
 
-		ballSpeed.y += racketHit / 7;
-		ballSpeed.x *= -1;
+		ball.getSpeed().y += racketHit / 7;
+		ball.getSpeed().x *= -1;
 
 		sendToDistantPlayer(Constants.MSG_CONTACT);
 		Sound.play(Constants.SOUND_CONTACT);
 	}
 
     private void checkWallCollision(Wall wall) {
-        Rectangle balleZone = new Rectangle(ballPoint.x - Constants.BALL_HEIGHT / 2,
-											ballPoint.y - Constants.BALL_WIDTH / 2,
-											Constants.BALL_WIDTH, Constants.BALL_HEIGHT);
-
-        if(!wall.isVisible() || !wall.intersects(balleZone))
+        if(!wall.isVisible() || !wall.intersects(ball.getZone()))
             return;
 
-		int racketHit = ballPoint.y - (wall.y + 25);
+		int racketHit = ball.y - (wall.y + 25);
 
-		ballSpeed.y += racketHit / 7;
-		ballSpeed.x = -ballSpeed.x;
+		ball.getSpeed().y += racketHit / 7;
+		ball.getSpeed().x = -ball.getSpeed().x;
 
 		sendToDistantPlayer(Constants.MSG_CONTACT);
 		Sound.play(Constants.SOUND_CONTACT);
@@ -299,21 +294,17 @@ public final class MirrorPong extends PongBase {
 	 * @return True s'il y a collision, false sinon
 	 */
 	private boolean checkCollision(Player joueur) {
-		Rectangle balleZone = new Rectangle(ballPoint.x - Constants.BALL_WIDTH / 2,
-											ballPoint.y - Constants.BALL_HEIGHT / 2,
-											Constants.BALL_WIDTH, Constants.BALL_HEIGHT);
-
-		return joueur.getZone().intersects(balleZone);
+		return joueur.getZone().intersects(ball.getZone());
 	}
 
 	/**
 	 * Vérifie que la balle ne soit pas en collision avec un mur.
 	 */
 	protected void checkWalls() {
-		int ballLeft = ballPoint.x - Constants.BALL_WIDTH / 2;
-		int ballTop = ballPoint.y - Constants.BALL_WIDTH / 2;
-		int ballRight = ballPoint.x + Constants.BALL_WIDTH;
-		int ballBottom = ballPoint.y;
+		int ballLeft = ball.x - (int) ball.getWidth() / 2;
+		int ballTop = ball.y - (int) ball.getHeight() / 2;
+		int ballRight = ball.x + (int) ball.getWidth();
+		int ballBottom = ball.y;
 
 		// gauche ou droit
 		if (ballLeft <= plane.x || ballRight >= plane.width) {
@@ -323,7 +314,7 @@ public final class MirrorPong extends PongBase {
 
 		// haut ou bas : la balle rebondit
 		if (ballTop <= plane.y || ballBottom >= plane.height)
-			ballSpeed.y = -ballSpeed.y;
+			ball.getSpeed().y = -ball.getSpeed().y;
 	}
 
 	/**
@@ -333,7 +324,7 @@ public final class MirrorPong extends PongBase {
 	 */
 	@Override
 	protected void onWallTouched() {
-		if (ballSpeed.x >= 0)
+		if (ball.getSpeed().x >= 0)
 			player1.incScore();
 		else
 			player2.incScore();
