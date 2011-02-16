@@ -208,8 +208,13 @@ public final class MirrorPong extends PongBase {
             {
                 wall.toggleVisibility();
 
-                if(wall.isVisible())
+                if(wall.isVisible()) {
                     wall.move();
+
+                    // pour éviter que la mur apparaisse sur la balle
+                    while(wall.getZone().intersects(ball.getZone()))
+                        wall.move();
+                }
 
                 // envoi des infos du mur
                 String msg = String.format("%s %d %d %s", Constants.MSG_WALL_POS,
