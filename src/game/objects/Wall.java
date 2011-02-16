@@ -22,20 +22,33 @@
 
 package game.objects;
 
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.io.File;
+import java.awt.Dimension;
 import java.io.IOException;
-import javax.imageio.ImageIO;
+import java.util.Random;
 
 
 public class Wall extends GraphicObject {
     private boolean isVisible = false;
+    private Dimension zone;
+    private int margin;
 
 
-    public Wall(String img) throws IOException {
+    public Wall(String img, Dimension zone, int margin) throws IOException {
         super(img);
+
+        this.zone = zone;
+        this.margin = margin;
+    }
+
+    /**
+     * Déplace le mur de manière aléatoire dans la zone définie lors de sa
+     * création
+     */
+    public void move() {
+        Random r = new Random();
+
+        x = r.nextInt((int) zone.getWidth()) + margin;
+        y = r.nextInt((int) zone.getHeight()) + margin;
     }
 
     public void setVisible(boolean visible) {

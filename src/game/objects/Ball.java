@@ -22,7 +22,6 @@
 
 package game.objects;
 
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -48,6 +47,14 @@ public class Ball extends GraphicObject {
         speed.y = y;
     }
 
+    /**
+	 * Déplace la balle selon sa vitesse actuelle.
+	 */
+    public void move() {
+        x += speed.x;
+		y += speed.y;
+    }
+
     @Override
     public void drawOn(Graphics g) {
         g.drawImage(img, x - (int) getWidth() / 2, y - (int) getHeight() / 2, null);
@@ -56,6 +63,6 @@ public class Ball extends GraphicObject {
     @Override
     public Rectangle getZone() {
         return new Rectangle(x - (int) getWidth() / 2, y - (int) getHeight() / 2,
-                              (int) getWidth(), (int) getHeight());
+                             (int) getWidth(), (int) getHeight());
     }
 }

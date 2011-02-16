@@ -27,6 +27,7 @@ import game.objects.Player;
 import game.Constants.State;
 import game.objects.Ball;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -101,19 +102,21 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	/**
 	 * Lance le jeu
 	 */
-	public void start() {
+	public final void start() {
+        initGUI();
+        initGame();
+        
 		// démarrage du thread de gestion du jeu
 		startGame();
 	}
 
+    protected abstract void initGame();
+
 	/**
 	 * Initialise la partie graphique.
-     *
-     * @param windowTitle Titre de la fenêtre
 	 */
-	protected final void initGUI(String windowTitle) {
+	private void initGUI() {
 		// caractéristiques de la fenêtre
-		setTitle(windowTitle);
 		setVisible(true);
 		setBounds(100, 100, 640, 480);
 		//setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -142,13 +145,16 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 		offscreeng = offscreeni.getGraphics();
 
         wallZone = new Rectangle(Constants.EFFECTS_ZONE_MARGIN,
-                                    Constants.EFFECTS_ZONE_MARGIN,
-                                    getWidth() - 2 * Constants.EFFECTS_ZONE_MARGIN,
-                                    getHeight() - 2 * Constants.EFFECTS_ZONE_MARGIN);
+                                 Constants.EFFECTS_ZONE_MARGIN,
+                                 getWidth() - 2 * Constants.EFFECTS_ZONE_MARGIN,
+                                 getHeight() - 2 * Constants.EFFECTS_ZONE_MARGIN);
 
 		// création du mur
         try {
-            wall = new Wall(Constants.IMG_WALL);
+            wall = new Wall(Constants.IMG_WALL,
+                            new Dimension((int) wallZone.getWidth(),
+                                          (int) wallZone.getHeight()),
+                            Constants.EFFECTS_ZONE_MARGIN);
         } catch (IOException e) {
 			showAlert("Impossible de charger le mur : "+e.getMessage());
 			System.exit(1);
@@ -619,7 +625,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	/**
 	 * Appelée lorsqu'un mur a été touché.
 	 */
-	protected void onWallTouched() {
+	protected final void onWallTouched() {
 		displayScores();
 
 		blink();

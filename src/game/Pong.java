@@ -67,26 +67,26 @@ public final class Pong extends PongBase {
 	}
 
 
-	/**
-	 * Connexion serveur avant l'initialisation de la partie graphique
-	 * et du jeu en lui même.
+    public Pong() {
+        setTitle("Pong");
+    }
+
+    /**
+	 * Initialisation du jeu. On réalise ici la connexion au serveur.
+     * Cette méthode est appelée après l'initialisation de la partie graphique
      *
      * @throws IllegalStateException Si la connexion au serveur est impossible
      */
-	@Override
-	public void start() {
+    @Override
+    protected void initGame() {
 		// connexion au serveur
 		try{
 			sock = new Connection();
 		} catch (IOException e) {
 			throw new IllegalStateException("Erreur à la connexion : " + e.getMessage());
 		}
-
-		initGUI("Pong");
-
+        
 		waitServer();
-
-		super.start();
 	}
 
 	/**
@@ -99,7 +99,7 @@ public final class Pong extends PongBase {
 		Paquet p;
 		while (currentState() != State.FINISHED) {
 			try {
-				p = sock.tryReceive(5);
+				p = sock.tryReceive(2);
 			} catch (IOException e) {
 				p = null;
 			}
@@ -109,7 +109,7 @@ public final class Pong extends PongBase {
 
 			repaint();
 
-            //wait(5);
+            wait(5);
 		}
 
         repaint();

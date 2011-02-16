@@ -85,34 +85,34 @@ public final class MirrorPong extends PongBase {
 		jp.start();
 	}
 
+    
+    public MirrorPong() {
+        setTitle("Mirror Pong");
+    }
 
-	/**
-	 * Création du serveur avant l'initialisation de la partie graphique
-	 * et du jeu en lui même.
+    /**
+	 * Initialisation du jeu. On réalise ici la création du serveur et l'attente
+     * de la connexion d'un client
+     *
+     * Cette méthode est appelée après l'initialisation de la partie graphique
      *
      * @throws IllegalStateException Si la création du serveur est impossible
      */
-	@SuppressWarnings("null")
-	@Override
-	public void start() {
-		// lancement du serveur
+    @Override
+    protected void initGame() {
+        // lancement du serveur
 		try {
 			sock = new Connection(serverPort);
 		} catch (Exception e) {
 			throw new IllegalStateException("Erreur au lancement du serveur : " + e.getLocalizedMessage());
 		}
 
-		// création de la GUI
-		initGUI("MirrorPong");
-
         // attente d'un client
         waitClient();
 
 		changeState(State.READY);
-
-		super.start();
-	}
-
+    }
+	
     @Override
     protected Player getMyPlayer() {
         return player1;
@@ -186,7 +186,7 @@ public final class MirrorPong extends PongBase {
             repaint();
             
 			try {
-				p = sock.tryReceive(5);
+				p = sock.tryReceive(2);
 			} catch (IOException e) {
 				p = null;
 			}
@@ -194,18 +194,22 @@ public final class MirrorPong extends PongBase {
             if(p != null && p.getMessage() != null)
 				executeCmd(p.getMessage());
 
+            // si le jeu est en pause, pas besoin de bouger la balle ou de
+            // vérifier les collisions
 			if(currentState() == State.PAUSED)
 				continue;
 
+            ball.move();
+
 			checkCollisions();
-            
-			moveBall();
 
             // gestion du mur "amovible" : seulement à partir de medium
             if(r.nextInt(200) == 34 && level.compareTo(Level.MEDIUM) >= 0)
             {
-                moveWall();
                 wall.toggleVisibility();
+
+                if(wall.isVisible())
+                    wall.move();
 
                 // envoi des infos du mur
                 String msg = String.format("%s %d %d %s", Constants.MSG_WALL_POS,
@@ -227,18 +231,17 @@ public final class MirrorPong extends PongBase {
 		onGameOver();
 	}
 
+    /**
+     * Regarde s'il n'y a pas eu de collision entre la balle et :
+     *  - les murs
+     *  - le "mur amovible"
+     *  - les raquettes des joueurs
+     */
     private void checkCollisions() {
         checkPlayerCollision(player1);
         checkPlayerCollision(player2);
         checkWallCollision(wall);
         checkWalls();
-    }
-
-    private void moveWall() {
-        Random r = new Random();
-
-        wall.x = r.nextInt((int) wallZone.getWidth()) + Constants.EFFECTS_ZONE_MARGIN;
-        wall.y = r.nextInt((int) wallZone.getHeight()) + Constants.EFFECTS_ZONE_MARGIN;
     }
 
 	/**
@@ -261,14 +264,6 @@ public final class MirrorPong extends PongBase {
             ball.getSpeed().x *= -1;
 
 		changeState(State.STARTED); // demarre le jeu
-	}
-
-	/**
-	 * Déplace la balle selon sa vitesse actuelle.
-	 */
-	protected void moveBall() {
-		ball.x += ball.getSpeed().x;
-		ball.y += ball.getSpeed().y;
 	}
 
 	/**
@@ -327,24 +322,26 @@ public final class MirrorPong extends PongBase {
 		int ballRight = ball.x + (int) ball.getWidth();
 		int ballBottom = ball.y;
 
+        // haut ou bas : la balle rebondit
+		if (ballTop <= plane.y || ballBottom >= plane.height) {
+			ball.getSpeed().y *= -1;
 		// gauche ou droit
-		if (ballLeft <= plane.x || ballRight >= plane.width) {
+        } else if (ballLeft <= plane.x || ballRight >= plane.width) {
+            // envoi de l'info "mur touché"
+            sendToDistantPlayer(Constants.MSG_WALL_TOUCHED);
 			onWallTouched();
-			return;
-		}
 
-		// haut ou bas : la balle rebondit
-		if (ballTop <= plane.y || ballBottom >= plane.height)
-			ball.getSpeed().y = -ball.getSpeed().y;
+            // un point a été marqué
+            onMiss();
+		}
 	}
 
 	/**
 	 * La balle a heurté un mur (derrière un des deux pavés).
-	 * On regarde de quel côté la balle touche le mur, ont met les scores à
+	 * On regarde de quel côté la balle touche le mur, on met les scores à
      * jour et on les envoie au client
 	 */
-	@Override
-	protected void onWallTouched() {
+	private void onMiss() {
 		if (ball.getSpeed().x >= 0)
 			player1.incScore();
 		else
@@ -358,11 +355,6 @@ public final class MirrorPong extends PongBase {
 		
         sendToDistantPlayer(msg1);
 		sendToDistantPlayer(msg2);
-
-		// envoi de l'info "mur touché"
-		sendToDistantPlayer(Constants.MSG_WALL_TOUCHED);
-
-		super.onWallTouched();
 
         // ici, soit le jeu est terminé, soit on est en attente de la relance
         changeState((player1.getScore() == maxPoints || player2.getScore() == maxPoints)
