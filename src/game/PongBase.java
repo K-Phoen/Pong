@@ -596,7 +596,7 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
 	 * Fait clignoter l'interface (par exemple lorsqu'un point
 	 * a été marqué).
 	 */
-	protected final void blink() {
+	private void blink() {
 		for (int i = 3; i > 0; i--) {
 			deathMode = true;
 			repaint();
