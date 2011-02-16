@@ -67,49 +67,49 @@ public final class Pong extends PongBase {
     }
 
 
+    public Pong() {
+        setTitle("Pong");
+    }
+
     /**
-     * Connexion serveur avant l'initialisation de la partie graphique
-     * et du jeu en lui même.
+	 * Initialisation du jeu. On réalise ici la connexion au serveur.
+     * Cette méthode est appelée après l'initialisation de la partie graphique
      *
      * @throws IllegalStateException Si la connexion au serveur est impossible
      */
     @Override
-    public void start() {
-        // connexion au serveur
-        try{
-            sock = new Connection();
-        } catch (IOException e) {
-            throw new IllegalStateException("Erreur à la connexion : " + e.getMessage());
-        }
-
-        initGUI("Pong");
-
+    protected void initGame() {
+		// connexion au serveur
+		try{
+			sock = new Connection();
+		} catch (IOException e) {
+			throw new IllegalStateException("Erreur à la connexion : " + e.getMessage());
+		}
+        
         waitServer();
+	}
 
-        super.start();
-    }
-
-    /**
-     * On met à jour le jeu selon les infos transmises par le serveur
-     *
-     * @note Sera appelée par le thread.
-     */
-    @Override
-    public void run() {
-        Paquet p;
-        while (currentState() != State.FINISHED) {
-            try {
-                p = sock.tryReceive(5);
-            } catch (IOException e) {
-                p = null;
-            }
+	/**
+	 * On met à jour le jeu selon les infos transmises par le serveur
+	 *
+	 * @note Sera appelée par le thread.
+	 */
+	@Override
+	public void run() {
+		Paquet p;
+		while (currentState() != State.FINISHED) {
+			try {
+				p = sock.tryReceive(2);
+			} catch (IOException e) {
+				p = null;
+			}
 
             if(p != null && p.getMessage() != null)
                 executeCmd(p.getMessage());
 
             repaint();
 
-            //wait(5);
+            wait(5);
         }
 
         repaint();

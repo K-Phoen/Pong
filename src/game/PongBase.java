@@ -27,6 +27,7 @@ import game.objects.Player;
 import game.Constants.State;
 import game.objects.Ball;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -98,31 +99,33 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
     private boolean deathMode = false;
 
 
-    /**
-     * Lance le jeu
-     */
-    public void start() {
-        // démarrage du thread de gestion du jeu
-        startGame();
-    }
+	/**
+	 * Lance le jeu
+	 */
+	public final void start() {
+        initGUI();
+        initGame();
+        
+		// démarrage du thread de gestion du jeu
+		startGame();
+	}
 
-    /**
-     * Initialise la partie graphique.
-     *
-     * @param windowTitle Titre de la fenêtre
-     */
-    protected final void initGUI(String windowTitle) {
-        // caractéristiques de la fenêtre
-        setTitle(windowTitle);
-        setVisible(true);
-        setBounds(100, 100, 640, 480);
-        //setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setResizable(false);
+    protected abstract void initGame();
 
-        // ajout des listener
-        addMouseListener(this);
-        addMouseMotionListener(this);
-        addKeyListener(this);
+	/**
+	 * Initialise la partie graphique.
+	 */
+	private void initGUI() {
+		// caractéristiques de la fenêtre
+		setVisible(true);
+		setBounds(100, 100, 640, 480);
+		//setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setResizable(false);
+
+		// ajout des listener
+		addMouseListener(this);
+		addMouseMotionListener(this);
+		addKeyListener(this);
 
         // création des joueurs
         try {
@@ -142,13 +145,16 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
         offscreeng = offscreeni.getGraphics();
 
         wallZone = new Rectangle(Constants.EFFECTS_ZONE_MARGIN,
-                                    Constants.EFFECTS_ZONE_MARGIN,
-                                    getWidth() - 2 * Constants.EFFECTS_ZONE_MARGIN,
-                                    getHeight() - 2 * Constants.EFFECTS_ZONE_MARGIN);
+                                 Constants.EFFECTS_ZONE_MARGIN,
+                                 getWidth() - 2 * Constants.EFFECTS_ZONE_MARGIN,
+                                 getHeight() - 2 * Constants.EFFECTS_ZONE_MARGIN);
 
         // création du mur
         try {
-            wall = new Wall(Constants.IMG_WALL);
+            wall = new Wall(Constants.IMG_WALL,
+                            new Dimension((int) wallZone.getWidth(),
+                                          (int) wallZone.getHeight()),
+                            Constants.EFFECTS_ZONE_MARGIN);
         } catch (IOException e) {
             showAlert("Impossible de charger le mur : "+e.getMessage());
             System.exit(1);
@@ -510,123 +516,123 @@ public abstract class PongBase extends JFrame implements KeyListener, Runnable, 
             case FINISHED:
                 offscreeng.drawString(myWin() ? "You win !" : "Game Over !",
                                       getWidth() / 2 - 110, getHeight() / 2);
-                break;
-            default:
-                return false;
-        }
+				break;
+			default:
+				return false;
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    /**
-     * Dessine les lignes du terrain
-     */
-    private void drawGroundLines() {
-        int circleRadius = 75;
-        int circleOriginY = getHeight() / 2;
-        int circleOriginX = getWidth() / 2;
-        int thickness = 4;
+	/**
+	 * Dessine les lignes du terrain
+	 */
+	private void drawGroundLines() {
+		int circleRadius = 75;
+		int circleOriginY = getHeight() / 2;
+		int circleOriginX = getWidth() / 2;
+		int thickness = 4;
 
-        drawCircle(offscreeng, circleOriginX, circleOriginY, circleRadius, thickness);
+		drawCircle(offscreeng, circleOriginX, circleOriginY, circleRadius, thickness);
 
-        //creation de la ligne de fond verticale ( drawLine(x1,y1,x2,y2) ) du point (x1,y1) au point (x2,y2)
-        // on en fait plusieurs pour gérer l'épaisseur du trait
-        offscreeng.drawLine(getWidth()/2,getHeight(),getWidth()/2, -getHeight());
-        offscreeng.drawLine(getWidth()/2+1,getHeight(),getWidth()/2+1, -getHeight());
-        offscreeng.drawLine(getWidth()/2-1,getHeight(),getWidth()/2-1, -getHeight());
-    }
+		//creation de la ligne de fond verticale ( drawLine(x1,y1,x2,y2) ) du point (x1,y1) au point (x2,y2)
+		// on en fait plusieurs pour gérer l'épaisseur du trait
+		offscreeng.drawLine(getWidth()/2,getHeight(),getWidth()/2, -getHeight());
+		offscreeng.drawLine(getWidth()/2+1,getHeight(),getWidth()/2+1, -getHeight());
+		offscreeng.drawLine(getWidth()/2-1,getHeight(),getWidth()/2-1, -getHeight());
+	}
 
-    /**
-     *     Calls the drawOval method of java.awt.Graphics
-     *  with a square bounding box centered at specified
-     *  location with width/height of 2r.
-     *
-     * @param g The Graphics object.
-     * @param x The x-coordinate of the center of the
-     *          circle.
-     * @param y The y-coordinate of the center of the
-     *          circle.
-     * @param r The radius of the circle.
-     */
-    private static void drawCircle(Graphics g, int x, int y, int r) {
-        g.drawOval(x-r, y-r, 2*r, 2*r);
-    }
+	/**
+	 * 	Calls the drawOval method of java.awt.Graphics
+	 *  with a square bounding box centered at specified
+	 *  location with width/height of 2r.
+	 *
+	 * @param g The Graphics object.
+	 * @param x The x-coordinate of the center of the
+	 *          circle.
+	 * @param y The y-coordinate of the center of the
+	 *          circle.
+	 * @param r The radius of the circle.
+	 */
+	private static void drawCircle(Graphics g, int x, int y, int r) {
+		g.drawOval(x-r, y-r, 2*r, 2*r);
+	}
 
-    /**
-     *     Draws a circle of radius r at location (x,y) with
-     *  the specified line width. Note that the radius r
-     *  is to the <B>center</B> of the doughnut drawn.
-     *  The outside radius will be r+lineWidth/2 (rounded
-     *  down). Inside radius will be r-lineWidth/2
-     *  (rounded down).
-     *
-     * @param g The Graphics object.
-     * @param x The x-coordinate of the center of the
-     *          circle.
-     * @param y The y-coordinate of the center of the
-     *          circle.
-     * @param r The radius of the circle.
-     * @param thickness Pen thickness of circle drawn.
-     */
-    private static void drawCircle(Graphics g, int x, int y, int r, int thickness) {
-        // correction du rayon pour prendre en compte l'épaisseur du trait
-        int radius = r + thickness / 2;
+	/**
+	 * 	Draws a circle of radius r at location (x,y) with
+	 *  the specified line width. Note that the radius r
+	 *  is to the <B>center</B> of the doughnut drawn.
+	 *  The outside radius will be r+lineWidth/2 (rounded
+	 *  down). Inside radius will be r-lineWidth/2
+	 *  (rounded down).
+	 *
+	 * @param g The Graphics object.
+	 * @param x The x-coordinate of the center of the
+	 *          circle.
+	 * @param y The y-coordinate of the center of the
+	 *          circle.
+	 * @param r The radius of the circle.
+	 * @param thickness Pen thickness of circle drawn.
+	 */
+	private static void drawCircle(Graphics g, int x, int y, int r, int thickness) {
+		// correction du rayon pour prendre en compte l'épaisseur du trait
+		int radius = r + thickness / 2;
 
-        for(int i=0; i < thickness; i++) {
-            drawCircle(g, x, y, r);
+		for(int i=0; i < thickness; i++) {
+			drawCircle(g, x, y, r);
 
-            if (i+1 < thickness) {
-                drawCircle(g, x+1, y, radius-1);
-                drawCircle(g, x-1, y, radius-1);
-                drawCircle(g, x, y+1, radius-1);
-                drawCircle(g, x, y-1, radius-1);
+			if (i+1 < thickness) {
+				drawCircle(g, x+1, y, radius-1);
+				drawCircle(g, x-1, y, radius-1);
+				drawCircle(g, x, y+1, radius-1);
+				drawCircle(g, x, y-1, radius-1);
 
-                radius--;
-            }
-        }
-    }
+				radius--;
+			}
+		}
+	}
 
-    /**
-     * Fait clignoter l'interface (par exemple lorsqu'un point
-     * a été marqué).
-     */
-    protected final void blink() {
-        for (int i = 3; i > 0; i--) {
-            deathMode = true;
-            repaint();
+	/**
+	 * Fait clignoter l'interface (par exemple lorsqu'un point
+	 * a été marqué).
+	 */
+	protected final void blink() {
+		for (int i = 3; i > 0; i--) {
+			deathMode = true;
+			repaint();
 
-            wait(300);
+			wait(300);
 
-            deathMode = false;
-            repaint();
+			deathMode = false;
+			repaint();
 
-            wait(300);
-        }
-    }
+			wait(300);
+		}
+	}
 
-    /**
-     * Affiche l'état des scores
-     */
-    private void displayScores() {
-        offscreeng.setFont(new Font("Dialog", Font.BOLD, 14));
+	/**
+	 * Affiche l'état des scores
+	 */
+	private void displayScores() {
+		offscreeng.setFont(new Font("Dialog", Font.BOLD, 14));
 
-        offscreeng.drawString(String.format("Joueur 1 : %d", player1.getScore()),
-                              getWidth() / 10, 35);
-        offscreeng.drawString(String.format("Joueur 2 : %d", player2.getScore()),
-                              4 * getWidth() / 5, 35);
-    }
+		offscreeng.drawString(String.format("Joueur 1 : %d", player1.getScore()),
+							  getWidth() / 10, 35);
+		offscreeng.drawString(String.format("Joueur 2 : %d", player2.getScore()),
+							  4 * getWidth() / 5, 35);
+	}
 
-    /**
-     * Appelée lorsqu'un mur a été touché.
-     */
-    protected void onWallTouched() {
-        displayScores();
+	/**
+	 * Appelée lorsqu'un mur a été touché.
+	 */
+	protected final void onWallTouched() {
+		displayScores();
 
-        blink();
-    }
+		blink();
+	}
 
-    /**
-     * Affiche une boite de dialogue contenant le message passé en paramètre.
+	/**
+	 * Affiche une boite de dialogue contenant le message passé en paramètre.
      * Seul le bouton "OK" est proposé par la fenêtre affichée.
      *
      * @param msg Message à afficher dans la fenêtre.
