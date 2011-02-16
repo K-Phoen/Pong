@@ -200,7 +200,7 @@ public final class MirrorPong extends PongBase {
             sendToDistantPlayer(String.format("%s %d %d", Constants.MSG_BALL,
                                                           ball.x, ball.y));
 
-            wait(5);
+            wait(8);
         }
 
         repaint();
@@ -313,7 +313,7 @@ public final class MirrorPong extends PongBase {
 
         // haut ou bas : la balle rebondit
         if (ballTop <= plane.y || ballBottom >= plane.height)
-            ball.getSpeed().y = -ball.getSpeed().y;
+            ball.getSpeed().y *= -1;
     }
 
     /**

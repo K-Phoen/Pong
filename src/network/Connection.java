@@ -130,7 +130,7 @@ public class Connection {
         toConfirm++;
 
         Paquet reply;
-        for(int nb_essais = NB_TRIES; nb_essais != 0; nb_essais--) {
+        for(int nbEssais = NB_TRIES; nbEssais != 0; nbEssais--) {
             try {
                 send(addr, port, String.format("%d %s", toConfirm, msg));
             } catch (IOException e) {
