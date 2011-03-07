@@ -46,6 +46,7 @@ public final class MirrorPong extends PongBase {
 	 */
 	private int maxPoints = 1;
 
+
     /**
      * Niveaux de difficulté disponibles :
      *  - Noob : jeu normal, vitesse de balle fixe
@@ -141,6 +142,10 @@ public final class MirrorPong extends PongBase {
 
         setDistantHost(p.getDatagram().getAddress());
         setDistantPort(p.getDatagram().getPort());
+    }
+    
+    public void setLevel(String level) {
+        this.level = Level.valueOf(level.toUpperCase());
     }
 
     /**
